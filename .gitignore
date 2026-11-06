@@ -1,0 +1,13 @@
+.DS_Store
+/.anc-data/
+/output/
+/ANC Card 开发构想.html
+/ANC Card 架构构想图.*
+/prototype-preview.png
+.env*
+*.wav
+*.m4a
+*.mp3
+*.aiff
+*.bin
+*.sqlite*

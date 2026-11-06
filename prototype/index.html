@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ANC Card · 工作循环原型</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f1f5fa;color:#142949;font:15px/1.55 -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}
+main{max-width:1060px;margin:auto;padding:30px 20px 55px}
+header{margin-bottom:20px}.label{font-size:12px;font-weight:750;letter-spacing:.08em;color:#2457c8}
+h1{font-size:32px;margin:3px 0 4px;line-height:1.25}
+h2{font-size:18px;margin:0 0 7px}p{margin:0 0 9px}
+.muted{color:#526682}.small{font-size:13px}code{font:13px ui-monospace,monospace}
+.grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:16px}
+.stack{display:grid;gap:14px;align-content:start}
+.card{background:white;border:1px solid #d9e3ef;border-radius:12px;padding:15px 17px;min-width:0}
+.card h2:last-child,.card p:last-child{margin-bottom:0}
+.next{background:#fff8ed;border-color:#ebc686}.done{background:#e9f8f2;border-color:#abdcca}
+.status{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.chip{display:inline-block;border-radius:20px;padding:3px 11px;background:#e8effd;color:#244ba3;font-size:13px;font-weight:700}
+button{cursor:pointer;font:inherit;font-weight:720;border:0;border-radius:8px;padding:8px 13px;background:#2457cb;color:white}
+button.secondary{background:#e9eef8;color:#294366}button:disabled{opacity:.55;cursor:wait}
+.checks,.events{padding:0;margin:0;list-style:none}
+.checks li,.events li{padding:7px 0;border-top:1px solid #e7edf4}
+.checks li:first-child,.events li:first-child{border-top:0}
+.checks .ok{color:#067052}.checks .gap{color:#9a4a0c}
+summary{cursor:pointer;color:#2457c8;margin-top:7px}pre{overflow:auto;padding:10px;background:#eef3f9;border-radius:7px;font-size:12px}
+#recordings-panel{margin-bottom:22px}
+#recordings-panel form{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:9px 0}
+#recordings-panel input{min-width:0;max-width:100%}
+#recordings-panel audio{display:block;width:min(100%,460px);margin:10px 0}
+#recordings-panel button.seek{background:#e9eef8;color:#294366;padding:2px 8px;margin-right:4px;font-size:13px}
+#recording-notice,#notice{color:#9a3b25;margin:0 0 8px}
+@media(max-width:740px){.grid{grid-template-columns:1fr}}
+</style>
+<main>
+  <header><div class="label">ANC CARD / 最小原型</div><h1>从录音到任务台账</h1><p class="muted">本机导入 · 异步转写 · 回听行动项证据</p></header>
+  <section id="recordings-panel" class="card">
+    <h2>导入录音</h2>
+    <p class="muted small">支持普通话 WAV、M4A、MP3，单个文件最多 64 MiB。</p>
+    <form id="recording-form">
+      <input type="file" aria-label="选择录音文件" accept=".wav,.m4a,.mp3" required>
+      <button>导入并排队</button>
+    </form>
+    <p id="recording-notice" role="status"></p>
+    <div id="playback" hidden><p id="audio-label" class="muted small"></p><audio controls preload="metadata"></audio></div>
+    <div id="recording-list">正在载入录音队列…</div>
+  </section>
+  <details><summary>Codex 同会话续跑演示（模拟转写）</summary>
+  <div id="notice" role="alert"></div>
+  <div id="screen" aria-busy="true">正在载入原型…</div>
+  </details>
+</main>
+<script type="module">
+const screen = document.querySelector('#screen');
+const notice = document.querySelector('#notice');
+const statuses = {ready:'等候导入',running:'执行中',awaiting:'待员工确认',complete:'已核验完成',blocked:'阻塞'};
+let last, sending = false;
+const escape = s => String(s ?? '').replace(/[&<>"']/g, c => ({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+})[c]);
+
+function render(state) {
+  const lastRound = state.rounds.at(-1);
+  const passed = lastRound?.checks.filter(check => check.passed).length ?? 0;
+  const checks = (lastRound?.checks ?? state.transcript.criteria).map(check => {
+    const mode = lastRound ? check.passed ? 'ok' : 'gap' : '';
+    return `<li><strong class="${mode}">${lastRound ? check.passed ? '通过' : '缺口' : '未验收'}</strong>
+      ${escape(check.label)}${check.evidence ? `<div class="muted small">${escape(check.evidence)}</div>` : ''}</li>`;
+  }).join('');
+  const proposal = state.proposal;
+  const suggestion = proposal ? `<section class="card next"><div class="label">主 AGENT · TAB 式下一步</div>
+      <h2>${escape(proposal.title)}</h2><p>${escape(proposal.action)}</p>
+      <p class="small"><strong>依据 </strong>${escape(proposal.reason)}<br>
+      <strong>来源 </strong><code>${escape(proposal.source)}</code><br>
+      <strong>验收 </strong>${escape(proposal.acceptance)}</p>
+      <button data-action="approve" data-proposal="${escape(proposal.id)}">确认并续跑</button>
+      </section>` : state.status === 'complete'
+    ? '<section class="card done"><h2>任务已收口</h2><p>第 2 轮的验收结果已写回同一个任务，三项全部通过。</p></section>'
+    : `<section class="card"><h2>${state.status === 'blocked' ? '任务仍有缺口' : '主 Agent 下一步建议'}</h2>
+       <p class="muted">${state.status === 'running' ? 'Codex 正在执行，完成后会自动核验结果…' : state.status === 'blocked' ? '请查看台账证据和事件记录。' : '导入转写后，建议会在首轮核验完成时出现。'}</p></section>`;
+  const history = state.rounds.map(round => `<li><strong>第 ${round.round} 轮 · ${round.checks.filter(c=>c.passed).length}/${round.checks.length}</strong>
+      <details><summary>查看本轮 Codex 回传与代码</summary>
+      <div class="muted small">Codex 会话 <code>${escape(round.sessionId)}</code></div><p>${escape(round.summary)}</p>
+      <strong>${escape(round.artifact)}</strong><pre>${escape(round.code)}</pre></details></li>`).join('');
+  screen.innerHTML = `<section class="card status">
+    <div><strong>接口示例交付</strong> <code>${escape(state.taskId)}</code> &nbsp;<span class="chip">${statuses[state.status]}</span>
+    <div class="muted small">已核验 ${passed}/${state.transcript.criteria.length} 项 · ${state.rounds.length} 轮已回传</div></div>
+    ${state.status === 'ready' ? '<button data-action="start">导入模拟转写</button>' :
+      state.status === 'running' ? '' : '<button class="secondary" data-action="reset">重置演示</button>'}
+    </section><div class="grid"><div class="stack">
+    <section class="card"><h2>任务台账</h2><ul class="checks">${checks}</ul></section>
+    <section class="card"><h2>两轮产物</h2>${history ? `<ul class="events">${history}</ul>` : '<p class="muted">执行结果将在这里保留。</p>'}</section>
+    <section class="card"><h2>模拟录音转写</h2><code>${escape(state.transcript.id)} · ${escape(state.transcript.time)}</code><p>${escape(state.transcript.text)}</p></section>
+    </div><div class="stack">${suggestion}
+    <section class="card"><h2>任务事件</h2>${state.events.length
+      ? `<ol class="events">${state.events.map(event => `<li><strong>${escape(event.actor)}</strong><div class="muted small">${escape(event.text)}</div></li>`).join('')}</ol>`
+      : '<p class="muted">等待导入。</p>'}</section>
+    </div></div>`;
+  screen.setAttribute('aria-busy', state.status === 'running');
+}
+
+function update(state) {
+  const snapshot = JSON.stringify(state);
+  if (snapshot === last) return;
+  last = snapshot;
+  render(state);
+}
+
+async function refresh() {
+  try {
+    const response = await fetch('/api/state', {cache:'no-store'});
+    if (response.ok) update(await response.json());
+  } catch { notice.textContent = '本机服务已断开。'; }
+}
+
+screen.addEventListener('click', async event => {
+  const button = event.target.closest('button[data-action]');
+  if (!button || sending) return;
+  sending = true;
+  button.disabled = true;
+  notice.textContent = '';
+  try {
+    const response = await fetch('/api/action', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({kind:button.dataset.action, proposalId:button.dataset.proposal}),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error);
+    update(data);
+  } catch (error) { notice.textContent = error.message; }
+  finally { sending = false; button.disabled = false; await refresh(); }
+});
+const recordingForm = document.querySelector('#recording-form');
+const recordingNotice = document.querySelector('#recording-notice');
+const recordingList = document.querySelector('#recording-list');
+const playback = document.querySelector('#playback');
+const player = playback.querySelector('audio');
+const audioLabel = document.querySelector('#audio-label');
+const recordingStatus = { queued:'排队中', processing:'转写中', failed:'处理失败', complete:'处理完成' };
+let lastRecordings;
+let seeking;
+let refreshingRecordings = false;
+
+function formatTime(ms) {
+  const seconds = Math.floor(ms / 1000);
+  return [Math.floor(seconds / 60), seconds % 60].map(n => String(n).padStart(2, '0')).join(':') +
+    '.' + String(ms % 1000).padStart(3, '0');
+}
+
+function timeButton(id, startMs, endMs) {
+  return `<button type="button" class="seek" data-audio="${id}" data-ms="${startMs}">${formatTime(startMs)}–${formatTime(endMs)}</button>`;
+}
+
+function renderRecordings(recordings) {
+  if (!recordings.length) {
+    recordingList.innerHTML = '<p class="muted">等待导入录音。</p>';
+    return;
+  }
+  const ledger = recordings.flatMap(recording => (recording.ledger ?? []).map(task =>
+    `<li>${timeButton(recording.id, task.startMs, task.endMs)} <strong>${escape(task.title)}</strong>
+      <span class="chip">待核对</span>
+      <div class="small">负责人 ${escape(task.owner)}${task.deadline ? ` · 截止 ${escape(task.deadline)}` : ''}</div>
+      <div class="small muted">${escape(recording.name)} · 原文「${escape(task.evidence)}」</div></li>`)).join('');
+  const queue = recordings.map(recording => {
+    const transcript = (recording.transcript ?? []).map(segment =>
+      `<li>${timeButton(recording.id, segment.startMs, segment.endMs)} ${escape(segment.text)}</li>`).join('');
+    return `<li><strong>${escape(recording.name)}</strong> <span class="chip">${recordingStatus[recording.status]}</span>
+      <span class="small muted">已尝试 ${recording.attempts} 次</span>
+      ${recording.error ? `<div class="small">${escape(recording.error)}
+        <button class="secondary" type="button" data-retry="${recording.id}">重试</button></div>` : ''}
+      ${recording.status === 'complete' ? `<details><summary>转写全文 · ${recording.ledger.length} 条行动项</summary>
+        ${transcript ? `<ul class="events">${transcript}</ul>` : '<p class="muted">未识别到语音。</p>'}</details>` : ''}
+    </li>`;
+  }).join('');
+  recordingList.innerHTML = `<h2>录音队列</h2><ul class="events">${queue}</ul>
+    <h2>录音任务台账</h2>${ledger ? `<ul class="events">${ledger}</ul>` : '<p class="muted">识别到的行动项会出现在这里。</p>'}`;
+}
+
+async function refreshRecordings() {
+  if (refreshingRecordings) return;
+  refreshingRecordings = true;
+  try {
+    const response = await fetch('/api/recordings', {cache:'no-store'});
+    if (!response.ok) throw new Error('无法读取录音队列。');
+    const snapshot = await response.text();
+    if (snapshot === lastRecordings) return;
+    renderRecordings(JSON.parse(snapshot));
+    lastRecordings = snapshot;
+  } catch (error) {
+    recordingNotice.textContent = error.message;
+  } finally {
+    refreshingRecordings = false;
+  }
+}
+
+recordingForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  const input = recordingForm.querySelector('input');
+  const button = recordingForm.querySelector('button');
+  const file = input.files[0];
+  if (!file) return;
+  button.disabled = true;
+  recordingNotice.textContent = '正在上传到本机…';
+  try {
+    const response = await fetch('/api/recordings', {
+      method:'POST', headers:{'X-ANC-Filename':encodeURIComponent(file.name)}, body:file,
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error);
+    recordingNotice.textContent = result.duplicate ? '此录音已导入，继续使用原队列记录。' : '录音已保存并入队。';
+    input.value = '';
+  } catch (error) {
+    recordingNotice.textContent = error.message;
+  } finally {
+    button.disabled = false;
+    await refreshRecordings();
+  }
+});
+
+function seek() {
+  if (seeking === undefined || player.readyState < 1) return;
+  player.currentTime = Math.min(seeking, player.duration);
+  seeking = undefined;
+  player.play().catch(() => {});
+}
+player.addEventListener('loadedmetadata', seek);
+
+recordingList.addEventListener('click', async event => {
+  const button = event.target.closest('button');
+  if (!button) return;
+  if (button.dataset.audio) {
+    const source = '/api/recordings/' + button.dataset.audio + '/audio';
+    playback.hidden = false;
+    audioLabel.textContent = '回听原录音 · ' + formatTime(Number(button.dataset.ms));
+    seeking = Number(button.dataset.ms) / 1000;
+    if (player.getAttribute('src') !== source) player.src = source;
+    seek();
+    return;
+  }
+  button.disabled = true;
+  try {
+    const response = await fetch('/api/recordings/' + button.dataset.retry + '/retry', {method:'POST'});
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error);
+    recordingNotice.textContent = '原录音已重新入队。';
+  } catch (error) {
+    recordingNotice.textContent = error.message;
+  } finally {
+    button.disabled = false;
+    await refreshRecordings();
+  }
+});
+
+await Promise.all([refresh(), refreshRecordings()]);
+setInterval(refresh, 650);
+setInterval(refreshRecordings, 1000);
+</script>
+</html>
