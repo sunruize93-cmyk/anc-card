@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { approve, blocked, initialState, receiveResult, start } from './loop.mjs';
 import { execute } from './worker.mjs';
 import { audioTypes, maxAudioBytes, openRecordings } from './recordings.mjs';
+import { configureSpeakmode, speakmodeStatus } from './speakmode.mjs';
 
 const port = Number(process.env.ANC_PROTOTYPE_PORT || 4785);
 const address = '127.0.0.1';
@@ -102,6 +103,25 @@ const server = createServer(async (request, response) => {
     return response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }).end(page);
   }
   if (request.method === 'GET' && request.url === '/api/state') return reply(response, 200, state);
+  if (request.url === '/api/speakmode') {
+    if (request.method === 'GET') return reply(response, 200, await speakmodeStatus());
+    if (request.method === 'POST') {
+      try {
+        let bytes = 0;
+        const chunks = [];
+        for await (const chunk of request) {
+          bytes += chunk.length;
+          if (bytes > 8192) return reply(response, 413, { error: '配置请求过长。' });
+          chunks.push(chunk);
+        }
+        const { region, key } = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+        await configureSpeakmode(region, key);
+        return reply(response, 200, await speakmodeStatus());
+      } catch (error) {
+        return reply(response, 400, { error: error instanceof SyntaxError ? '配置请求无效。' : error.message });
+      }
+    }
+  }
   if (request.url === '/api/recordings') {
     if (request.method === 'GET') return reply(response, 200, recordings.list());
     if (request.method === 'POST') {

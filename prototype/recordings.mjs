@@ -4,17 +4,16 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { promisify } from 'node:util';
+import { splitWav, timingMethod, transcribeChunk } from './speakmode.mjs';
 
 const exec = promisify(execFile);
 export const maxAudioBytes = 64 * 1024 * 1024;
 export const audioTypes = { '.wav': 'audio/wav', '.m4a': 'audio/mp4', '.mp3': 'audio/mpeg' };
 
-async function transcribe(audio, extension, scratch, signal) {
-  if (!process.env.ANC_WHISPER_MODEL) throw new Error('请设置 ANC_WHISPER_MODEL 并重启服务，再重试。');
+async function transcribe(audio, extension, scratch, signal, cache) {
   const directory = await mkdtemp(join(scratch, 'job-'));
   const original = join(directory, 'original' + extension);
   const wav = join(directory, 'normalized.wav');
-  const output = join(directory, 'transcript');
   const options = { signal, maxBuffer: 1024 * 1024 };
   try {
     await writeFile(original, audio);
@@ -24,23 +23,18 @@ async function transcribe(audio, extension, scratch, signal) {
     } catch {
       throw new Error('音频转换失败。请检查文件能否播放以及格式是否正确。');
     }
-    try {
-      await exec(process.env.ANC_WHISPER_BIN || 'whisper-cli', [
-        '-m', process.env.ANC_WHISPER_MODEL, '-f', wav, '-l', 'zh',
-        '--prompt', '以下是普通话简体中文会议记录。', '-oj', '-of', output, '-np',
-      ], { ...options, timeout: 30 * 60_000 });
-    } catch (error) {
-      if (error.code === 'ENOENT') throw new Error('找不到 whisper-cli，请检查 ANC_WHISPER_BIN。');
-      if (error.killed) throw new Error('转写超时，可以重试。');
-      throw new Error('转写失败，请检查模型路径和 whisper-cli。');
+    const segments = [];
+    for (const chunk of splitWav(await readFile(wav))) {
+      signal.throwIfAborted();
+      let segment = cache.get(chunk);
+      if (!segment) {
+        segment = await transcribeChunk(chunk, directory, signal);
+        signal.throwIfAborted();
+        cache.put(chunk, segment);
+      }
+      segments.push(segment);
     }
-    const { transcription } = JSON.parse(await readFile(output + '.json', 'utf8'));
-    if (!Array.isArray(transcription)) throw new Error('转写引擎未返回可用的时间段。');
-    return transcription.flatMap(({ offsets, text }) => {
-      if (!Number.isSafeInteger(offsets?.from) || !Number.isSafeInteger(offsets?.to) ||
-          offsets.from < 0 || offsets.to <= offsets.from || !text?.trim()) return [];
-      return [{ startMs: offsets.from, endMs: offsets.to, text: text.trim() }];
-    });
+    return segments;
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
@@ -52,6 +46,7 @@ function extract(segments) {
     return [...segment.text.matchAll(pattern)].map(([, owner, title, deadline]) => ({
       id: randomUUID(), owner, title: title.trim(), deadline: deadline?.trim() ?? null,
       startMs: segment.startMs, endMs: segment.endMs, evidence: segment.text, status: 'needs_review',
+      timing: segment.timing, sourceId: segment.sourceId, chunkSha256: segment.chunkSha256,
     }));
   });
 }
@@ -70,6 +65,11 @@ export async function openRecordings(directory) {
         id TEXT PRIMARY KEY, name TEXT NOT NULL, audio BLOB NOT NULL,
         createdAt TEXT NOT NULL, status TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0,
         error TEXT, transcript TEXT, ledger TEXT
+      );
+      CREATE TABLE IF NOT EXISTS chunk_results (
+        recordingId TEXT NOT NULL, chunkIndex INTEGER NOT NULL,
+        timingMethod TEXT NOT NULL, sha256 TEXT NOT NULL, segment TEXT NOT NULL,
+        PRIMARY KEY (recordingId, chunkIndex)
       );
       UPDATE recordings SET status = 'queued' WHERE status = 'processing';
       COMMIT;
@@ -96,6 +96,10 @@ export async function openRecordings(directory) {
   const retry = db.prepare("UPDATE recordings SET status = 'queued', error = NULL WHERE id = ? AND status = 'failed'");
   const info = db.prepare('SELECT name, length(audio) AS size FROM recordings WHERE id = ?');
   const readAudio = db.prepare('SELECT substr(audio, ?, ?) AS bytes FROM recordings WHERE id = ?');
+  const cachedChunk = db.prepare('SELECT segment FROM chunk_results WHERE recordingId = ? AND chunkIndex = ? AND timingMethod = ? AND sha256 = ?');
+  const saveChunk = db.prepare(`INSERT INTO chunk_results VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(recordingId, chunkIndex) DO UPDATE SET timingMethod = excluded.timingMethod,
+      sha256 = excluded.sha256, segment = excluded.segment`);
   const decode = row => ({ ...row, transcript: JSON.parse(row.transcript), ledger: JSON.parse(row.ledger) });
 
   const shutdown = new AbortController();
@@ -106,7 +110,13 @@ export async function openRecordings(directory) {
       if (!job) return;
       claim.run(job.id);
       try {
-        const segments = await transcribe(job.audio, extname(job.name).toLowerCase(), scratch, shutdown.signal);
+        const segments = await transcribe(job.audio, extname(job.name).toLowerCase(), scratch, shutdown.signal, {
+          get: chunk => {
+            const row = cachedChunk.get(job.id, chunk.index, timingMethod, chunk.sha256);
+            return row ? JSON.parse(row.segment) : null;
+          },
+          put: (chunk, segment) => saveChunk.run(job.id, chunk.index, timingMethod, chunk.sha256, JSON.stringify(segment)),
+        });
         if (shutdown.signal.aborted) return;
         complete.run(JSON.stringify(segments), JSON.stringify(extract(segments)), job.id);
       } catch (error) {

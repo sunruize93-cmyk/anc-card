@@ -1,43 +1,67 @@
 # ANC Card
 
-ANC Card 是五人团队的本机协作原型。它验证录音能否变成有出处的任务台账，以及处理到一半中断后能否接着跑。
-
-导入音频后，原文件和排队记录先写入 SQLite。后台用本机 Whisper 转写，提取明确交代了负责人的行动项，并在同一次数据库写入中保存转写、台账条目和完成状态。点击条目的时间范围可跳回原录音。所有行动项初始状态为「待核对」。
+ANC Card 是五人团队的录音与任务台账原型。导入音频后，原文件先与排队记录一起写入 SQLite。后台调用 SpeakMode 的文件转写工具，把识别到的明确分工写入带出处的任务台账。点击时间范围可回听原录音，行动项初始状态为「待核对」。
 
 ## 本机运行
 
-需要 macOS、Node.js 22.13+、[whisper.cpp CLI](https://github.com/ggml-org/whisper.cpp) 和多语言模型。安装完成后，录音导入和转写可离线运行。
+需要 macOS、Node.js 22.13+、Rust stable、Git 和 Xcode Command Line Tools。在项目根目录执行以下命令，安装固定版本的 SpeakMode 文件转写工具，然后启动原型。
 
 ```bash
-brew install whisper.cpp
-mkdir -p "$HOME/.local/share/anc-card"
-curl -fL https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small-q5_1.bin \
-  -o "$HOME/.local/share/anc-card/ggml-small-q5_1.bin"
-export ANC_WHISPER_MODEL="$HOME/.local/share/anc-card/ggml-small-q5_1.bin"
+sh prototype/scripts/setup-speakmode.sh
 node prototype/server.mjs
 ```
 
-打开 [本机原型](http://127.0.0.1:4785/)，选择一份 WAV、M4A 或 MP3，点击「导入并排队」。可在另一个终端生成约 29 秒的自制普通话样本，再导入。
+打开[本机原型](http://127.0.0.1:4785/)，展开「配置 SpeakMode 的阿里云转写」，选择 API Key 所属的北京或新加坡地域，填写百炼 Key 并保存到登录钥匙串。也可在终端配置，输入时会隐藏 Key。
+
+```bash
+sh prototype/scripts/configure-speakmode.sh
+```
+
+配置助手使用 SpeakMode 自己的配置和凭据接口。其配置数据库默认位于 `~/.local/share/anc-card/speakmode/config.sqlite`，密钥保存在 SpeakMode 的登录钥匙串条目中。保存配置后，导入一份 WAV、M4A 或 MP3 开始处理。音频分段会发送到所选地域的阿里云。
+
+需要创建 Key 时，可参考[百炼 API Key 配置说明](https://help.aliyun.com/zh/model-studio/get-api-key)。
+
+## SpeakMode 接入方式
+
+安装脚本拉取 SpeakMode 的固定提交 `6ba4432d91727d300ba6f3e4b1a9e29d37064a64`，编译其原有 `file_asr_lab`。ANC Card 在运行时直接调用该可执行文件，读取其 JSONL 回执，校验音频 SHA-256、样本数、完整状态、模型和处理批次，再写入台账。配置助手调用 SpeakMode 的 Store 和 credentials 接口。
+
+该工具固定使用阿里云 `qwen3-asr-flash`，输出整段文字。ANC Card 先转换为 16 kHz 单声道 PCM16 WAV，按停顿切成最长 30 秒的音频段，保留每段在原文件里的样本偏移。识别结果绑定到该段的起止位置，页面显示「分段回听」。
+
+这个时间范围覆盖整段音频。持续讲话达到 30 秒会强制切段，边界可能落在句中。识别和行动项提取均需回听核对。对于后续长会议扩展，可评估支持原生时间戳的文件转写模型，具体能力见[阿里云语音识别文档](https://help.aliyun.com/zh/model-studio/asr-model)。
+
+每个成功分段都会独立保存。失败重试和重启会复用已保存的分段结果。进程中断时，尚未落盘的远端请求可能已经被供应商处理，再次提交可能产生重复调用费用。
+
+## 自制音频与验收
+
+生成约 29 秒的普通话样本，再从页面导入。
 
 ```bash
 sh prototype/scripts/make-sample.sh /tmp/anc-card-sample.wav
 ```
 
-- `ANC_WHISPER_BIN` 可指定 whisper-cli 路径。默认从 PATH 查找。
-- `ANC_DATA_DIR` 可指定独立数据目录。默认使用仓库内的 `.anc-data/`，其中保存原录音、转写与台账，Git 会忽略它。
-- `ANC_PROTOTYPE_PORT` 默认为 `4785`。服务只监听 `127.0.0.1`，同一数据目录同时只允许一个服务打开。
+离线验证会实际生成音频、进行转换和分段，再使用明确标注的 SpeakMode CLI 协议夹具验证持久化链路。
 
-## 验证结果
+```bash
+node prototype/verify.mjs
+```
 
-用自制 WAV 跑通了实际本机转写。台账提取到小王的会议纪要（本周五，约 00:09–00:15）和小李的测试文档（下周一，约 00:19–00:26）。模型把样本里的「纪要」识别成了「计要」，页面保留转写原文供回听核对。
+已验证并发重复导入只入队一次、分段转写失败后重试、已完成分段复用、SIGKILL 后自动恢复、台账与分段证据绑定、原音频逐字节返回和区间读取，以及完成台账在重启后保持条目 ID。损坏回执和音频哈希不符会被拒绝。SpeakMode 上游 `file_asr_lab` 的 7 项测试也已通过。
 
-- **重复导入**。并发上传相同字节、不同文件名，只生成一条队列记录。文件名取首次入队时的值。
-- **失败重试**。把 `ANC_WHISPER_BIN` 指到不存在的文件会留下失败状态。修正路径后用同一数据目录重启，点「重试」会复用原录音和记录。并发重复点击仅接受一次。
-- **重启恢复**。实测强制结束服务，重启后原「转写中」任务自动重新排队，原「排队中」任务继续处理，已完成台账保留原条目 ID。每次开始处理都会累计尝试次数。
-- **原音频取证**。服务返回的音频与上传文件逐字节相同，支持 HTTP 字节区间读取供播放器定位。
+**真实云端验收需要先完成 Key 配置。** 配置后运行以下命令，它会将自制音频通过 SpeakMode 发给阿里云，核对两条行动项及其证据位置。结果会保留在当前台账中。
 
-## 原型边界
+```bash
+node prototype/verify-live.mjs
+```
 
-每份文件上限 64 MiB。当前验证使用短普通话样本。提取规则针对「由某人负责某事」一类明确表述，可保留同一转写段里的「截止时间是……」。时间戳来自 Whisper 的转写段。录音卡、飞书和真实长会议尚未验收。
+离线协议夹具的通过结果只能证明队列和数据流，真实语音识别的结果以 `verify-live.mjs` 为准。
 
-页面底部保留 [Codex 同会话续跑演示](prototype/README.md)。它有独立的模拟输入和内存状态。录音任务写入台账后停在待核对阶段。
+## 参数与数据
+
+- `ANC_SPEAKMODE_BIN` 可指定 `file_asr_lab` 可执行文件的绝对路径。
+- `ANC_SPEAKMODE_CONFIG_DB` 可指向已有 SpeakMode 的配置数据库。复用配置时需要其中的阿里云地域与登录钥匙串凭据相匹配。
+- `ANC_DATA_DIR` 可指定独立录音数据目录，默认为仓库内的 `.anc-data/`。
+- `ANC_PROTOTYPE_PORT` 默认为 `4785`。服务监听 `127.0.0.1`，同一数据目录同时只允许一个服务打开。
+
+原录音、转写、分段检查点和任务台账保存在本机数据目录，Git 会忽略该目录。每份音频上限 64 MiB。现有提取规则针对「由某人负责某事」一类明确表述，可保留同一分段中的「截止时间是……」。
+
+旧版台账可继续读取，并在页面标记为「旧版本机转写」。录音卡、飞书和真实长会议仍待接入或验收。页面底部保留独立的 [Codex 同会话续跑演示](prototype/README.md)。

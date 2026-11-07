@@ -34,10 +34,22 @@ summary{cursor:pointer;color:#2457c8;margin-top:7px}pre{overflow:auto;padding:10
 @media(max-width:740px){.grid{grid-template-columns:1fr}}
 </style>
 <main>
-  <header><div class="label">ANC CARD / 最小原型</div><h1>从录音到任务台账</h1><p class="muted">本机导入 · 异步转写 · 回听行动项证据</p></header>
+  <header><div class="label">ANC CARD / 最小原型</div><h1>从录音到任务台账</h1><p class="muted">SpeakMode 转写 · 分段回听 · 持久化台账</p></header>
+  <section class="card" style="margin-bottom:16px">
+    <p id="speakmode-status" role="status">正在检查 SpeakMode…</p>
+    <details id="speakmode-settings"><summary>配置 SpeakMode 的阿里云转写</summary>
+      <p class="muted small">当前文件转写使用 qwen3-asr-flash。录音分段会发送至所选阿里云地域。</p>
+      <form id="speakmode-form">
+        <label>Key 所属地域 <select name="region"><option value="beijing">北京</option><option value="singapore">新加坡</option></select></label>
+        <label>API Key <input type="password" name="key" autocomplete="off" required maxlength="4096"></label>
+        <button>保存到登录钥匙串</button>
+      </form>
+      <p id="speakmode-notice" class="small" role="status"></p>
+    </details>
+  </section>
   <section id="recordings-panel" class="card">
     <h2>导入录音</h2>
-    <p class="muted small">支持普通话 WAV、M4A、MP3，单个文件最多 64 MiB。</p>
+    <p class="muted small">支持普通话 WAV、M4A、MP3，单个文件最多 64 MiB。回听时间范围由音频分段确定。</p>
     <form id="recording-form">
       <input type="file" aria-label="选择录音文件" accept=".wav,.m4a,.mp3" required>
       <button>导入并排队</button>
@@ -148,8 +160,8 @@ function formatTime(ms) {
     '.' + String(ms % 1000).padStart(3, '0');
 }
 
-function timeButton(id, startMs, endMs) {
-  return `<button type="button" class="seek" data-audio="${id}" data-ms="${startMs}">${formatTime(startMs)}–${formatTime(endMs)}</button>`;
+function timeButton(id, startMs, endMs, timing) {
+  return `<button type="button" class="seek" data-audio="${id}" data-ms="${startMs}">${timing === 'audio_chunk' ? '分段回听 ' : ''}${formatTime(startMs)}–${formatTime(endMs)}</button>`;
 }
 
 function renderRecordings(recordings) {
@@ -158,15 +170,18 @@ function renderRecordings(recordings) {
     return;
   }
   const ledger = recordings.flatMap(recording => (recording.ledger ?? []).map(task =>
-    `<li>${timeButton(recording.id, task.startMs, task.endMs)} <strong>${escape(task.title)}</strong>
+    `<li>${timeButton(recording.id, task.startMs, task.endMs, task.timing)} <strong>${escape(task.title)}</strong>
       <span class="chip">待核对</span>
       <div class="small">负责人 ${escape(task.owner)}${task.deadline ? ` · 截止 ${escape(task.deadline)}` : ''}</div>
       <div class="small muted">${escape(recording.name)} · 原文「${escape(task.evidence)}」</div></li>`)).join('');
   const queue = recordings.map(recording => {
     const transcript = (recording.transcript ?? []).map(segment =>
-      `<li>${timeButton(recording.id, segment.startMs, segment.endMs)} ${escape(segment.text)}</li>`).join('');
+      `<li>${timeButton(recording.id, segment.startMs, segment.endMs, segment.timing)} ${escape(segment.text)}</li>`).join('');
+    const source = recording.transcript?.some(segment => segment.engine === 'speakmode')
+      ? 'SpeakMode · qwen3-asr-flash · 音频分段范围' : '旧版本机转写';
     return `<li><strong>${escape(recording.name)}</strong> <span class="chip">${recordingStatus[recording.status]}</span>
       <span class="small muted">已尝试 ${recording.attempts} 次</span>
+      ${recording.status === 'complete' ? `<div class="small muted">${source}</div>` : ''}
       ${recording.error ? `<div class="small">${escape(recording.error)}
         <button class="secondary" type="button" data-retry="${recording.id}">重试</button></div>` : ''}
       ${recording.status === 'complete' ? `<details><summary>转写全文 · ${recording.ledger.length} 条行动项</summary>
@@ -252,7 +267,46 @@ recordingList.addEventListener('click', async event => {
   }
 });
 
-await Promise.all([refresh(), refreshRecordings()]);
+async function refreshSpeakmode() {
+  const response = await fetch('/api/speakmode', {cache:'no-store'});
+  if (!response.ok) throw new Error('无法检查 SpeakMode 配置。');
+  const status = await response.json();
+  document.querySelector('#speakmode-status').textContent = !status.installed
+    ? 'SpeakMode 转写工具尚待安装。请运行 sh prototype/scripts/setup-speakmode.sh。'
+    : !status.configured ? 'SpeakMode 转写工具已就绪，请配置阿里云 API Key。'
+      : '已发现 SpeakMode 配置，导入录音后可校验转写连接。';
+  if (status.installed && !status.configured) document.querySelector('#speakmode-settings').open = true;
+}
+
+document.querySelector('#speakmode-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const key = form.elements.key;
+  const button = form.querySelector('button');
+  const notice = document.querySelector('#speakmode-notice');
+  button.disabled = true;
+  notice.textContent = '正在保存，请留意系统钥匙串提示…';
+  try {
+    const response = await fetch('/api/speakmode', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({region:form.elements.region.value, key:key.value}),
+    });
+    key.value = '';
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error);
+    notice.textContent = '配置已保存。可以导入自制音频，或重试失败的录音。';
+    await refreshSpeakmode();
+  } catch (error) {
+    notice.textContent = error.message;
+  } finally {
+    key.value = '';
+    button.disabled = false;
+  }
+});
+
+await Promise.all([refresh(), refreshRecordings(), refreshSpeakmode().catch(error => {
+  document.querySelector('#speakmode-status').textContent = error.message;
+})]);
 setInterval(refresh, 650);
 setInterval(refreshRecordings, 1000);
 </script>
