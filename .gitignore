@@ -1,4 +1,5 @@
 .DS_Store
+node_modules/
 /.anc-data/
 /output/
 /ANC Card 开发构想.html

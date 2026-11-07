@@ -5,6 +5,7 @@ import { extname, join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { promisify } from 'node:util';
 import { splitWav, timingMethod, transcribeChunk } from './speakmode.mjs';
+import { openTasks } from './tasks.mjs';
 
 const exec = promisify(execFile);
 export const maxAudioBytes = 64 * 1024 * 1024;
@@ -40,14 +41,19 @@ async function transcribe(audio, extension, scratch, signal, cache) {
   }
 }
 
-function extract(segments) {
+export function extract(segments) {
   return segments.flatMap(segment => {
-    const pattern = /(?:^|[。！？；，、,.!?;])\s*由\s*([\p{Script=Han}]{1,12})\s*[负負][责責]\s*([^。！？；，,.!?;]+)(?:[，,]\s*截止[时時][间間](?:是|为|為)\s*([^。！？；，,.!?;]+))?/gu;
-    return [...segment.text.matchAll(pattern)].map(([, owner, title, deadline]) => ({
-      id: randomUUID(), owner, title: title.trim(), deadline: deadline?.trim() ?? null,
+    const pattern = /(?:^|[。！？；，、,.!?;])\s*由\s*([\p{Script=Han}]{1,12})\s*[负負][责責]\s*([^。！？；，,.!?;]+)/gu;
+    const matches = [...segment.text.matchAll(pattern)];
+    return matches.map((match, index) => {
+      const [, owner, title] = match;
+      const actionText = segment.text.slice(match.index, matches[index + 1]?.index ?? segment.text.length);
+      const deadline = /截止[时時][间間](?:是|为|為)\s*([^。！？；，,.!?;]+)/u.exec(actionText)?.[1];
+      return { id: randomUUID(), owner, title: title.trim(), deadline: deadline?.trim() ?? null,
       startMs: segment.startMs, endMs: segment.endMs, evidence: segment.text, status: 'needs_review',
       timing: segment.timing, sourceId: segment.sourceId, chunkSha256: segment.chunkSha256,
-    }));
+      };
+    });
   });
 }
 
@@ -82,6 +88,7 @@ export async function openRecordings(directory) {
   }
 
   const fields = 'id, name, createdAt, status, attempts, error, transcript, ledger';
+  const tasks = openTasks(db);
   const one = db.prepare(`SELECT ${fields} FROM recordings WHERE id = ?`);
   const all = db.prepare(`SELECT ${fields} FROM recordings ORDER BY createdAt DESC, rowid DESC`);
   const insert = db.prepare(`
@@ -101,6 +108,7 @@ export async function openRecordings(directory) {
     ON CONFLICT(recordingId, chunkIndex) DO UPDATE SET timingMethod = excluded.timingMethod,
       sha256 = excluded.sha256, segment = excluded.segment`);
   const decode = row => ({ ...row, transcript: JSON.parse(row.transcript), ledger: JSON.parse(row.ledger) });
+  for (const recording of all.all().map(decode)) tasks.ingest(recording);
 
   const shutdown = new AbortController();
   let worker;
@@ -118,7 +126,16 @@ export async function openRecordings(directory) {
           put: (chunk, segment) => saveChunk.run(job.id, chunk.index, timingMethod, chunk.sha256, JSON.stringify(segment)),
         });
         if (shutdown.signal.aborted) return;
-        complete.run(JSON.stringify(segments), JSON.stringify(extract(segments)), job.id);
+        const ledger = extract(segments);
+        db.exec('BEGIN');
+        try {
+          complete.run(JSON.stringify(segments), JSON.stringify(ledger), job.id);
+          tasks.ingest({ id: job.id, name: job.name, ledger });
+          db.exec('COMMIT');
+        } catch (error) {
+          db.exec('ROLLBACK');
+          throw error;
+        }
       } catch (error) {
         if (!shutdown.signal.aborted) fail.run(error.message, job.id);
       }
@@ -134,6 +151,7 @@ export async function openRecordings(directory) {
 
   wake();
   return {
+    tasks,
     list: () => all.all().map(decode),
     import(name, audio) {
       const id = createHash('sha256').update(audio).digest('hex');

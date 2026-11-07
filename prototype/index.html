@@ -47,6 +47,24 @@ summary{cursor:pointer;color:#2457c8;margin-top:7px}pre{overflow:auto;padding:10
       <p id="speakmode-notice" class="small" role="status"></p>
     </details>
   </section>
+  <section class="card" style="margin-bottom:16px">
+    <h2>飞书测试群</h2>
+    <p id="feishu-status" role="status">正在检查飞书连接…</p>
+    <details><summary>配置企业自建应用和负责人</summary>
+      <p class="muted small">应用需开启机器人能力，配置发送消息、更新卡片、读取群及群成员权限。在回调配置中订阅 card.action.trigger，选择长连接接收。</p>
+      <p class="small"><a href="https://open.feishu.cn/app/" target="_blank" rel="noreferrer">飞书开发者后台</a></p>
+      <form id="feishu-form">
+        <p><label>App ID <input name="appId" required autocomplete="off"></label></p>
+        <p><label>App Secret <input name="appSecret" type="password" autocomplete="off"></label></p>
+        <p><button value="app">保存应用并连接</button> <button type="button" id="load-chats" class="secondary">读取测试群</button></p>
+        <p><label>测试群 <select name="chatId"><option value="">请选择</option></select></label></p>
+        <p><label>负责人 <select name="ownerOpenId"><option value="">请选择</option></select></label></p>
+        <button value="group">保存测试群和负责人</button>
+      </form>
+      <p class="muted small">应用凭据保存在本机数据目录。准备具体任务后，机器人会向所选测试群发送该任务的确认卡。</p>
+      <p id="feishu-notice" role="status"></p>
+    </details>
+  </section>
   <section id="recordings-panel" class="card">
     <h2>导入录音</h2>
     <p class="muted small">支持普通话 WAV、M4A、MP3，单个文件最多 64 MiB。回听时间范围由音频分段确定。</p>
@@ -58,6 +76,12 @@ summary{cursor:pointer;color:#2457c8;margin-top:7px}pre{overflow:auto;padding:10
     <div id="playback" hidden><p id="audio-label" class="muted small"></p><audio controls preload="metadata"></audio></div>
     <div id="recording-list">正在载入录音队列…</div>
   </section>
+  <section class="card" style="margin-bottom:16px">
+    <h2>录音任务执行台账</h2>
+    <p class="muted small">先核对来源和执行方案，再由负责人确认。当前支持两轮接口验收方案，首轮交付示例与说明，次轮确认后补上 429 重试。</p>
+    <p id="task-notice" role="status"></p>
+    <div id="task-list">正在载入任务…</div>
+  </section>
   <details><summary>Codex 同会话续跑演示（模拟转写）</summary>
   <div id="notice" role="alert"></div>
   <div id="screen" aria-busy="true">正在载入原型…</div>
@@ -66,7 +90,7 @@ summary{cursor:pointer;color:#2457c8;margin-top:7px}pre{overflow:auto;padding:10
 <script type="module">
 const screen = document.querySelector('#screen');
 const notice = document.querySelector('#notice');
-const statuses = {ready:'等候导入',running:'执行中',awaiting:'待员工确认',complete:'已核验完成',blocked:'阻塞'};
+const statuses = {ready:'等候导入',queued:'已入执行队列',running:'执行中',awaiting:'待员工确认',complete:'已核验完成',blocked:'阻塞',interrupted:'执行中断，待恢复'};
 let last, sending = false;
 const escape = s => String(s ?? '').replace(/[&<>"']/g, c => ({
   '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
@@ -99,7 +123,7 @@ function render(state) {
     <div><strong>接口示例交付</strong> <code>${escape(state.taskId)}</code> &nbsp;<span class="chip">${statuses[state.status]}</span>
     <div class="muted small">已核验 ${passed}/${state.transcript.criteria.length} 项 · ${state.rounds.length} 轮已回传</div></div>
     ${state.status === 'ready' ? '<button data-action="start">导入模拟转写</button>' :
-      state.status === 'running' ? '' : '<button class="secondary" data-action="reset">重置演示</button>'}
+      ['running','queued'].includes(state.status) ? '' : '<button class="secondary" data-action="reset">重置演示</button>'}
     </section><div class="grid"><div class="stack">
     <section class="card"><h2>任务台账</h2><ul class="checks">${checks}</ul></section>
     <section class="card"><h2>两轮产物</h2>${history ? `<ul class="events">${history}</ul>` : '<p class="muted">执行结果将在这里保留。</p>'}</section>
@@ -241,9 +265,9 @@ function seek() {
 }
 player.addEventListener('loadedmetadata', seek);
 
-recordingList.addEventListener('click', async event => {
+document.querySelector('main').addEventListener('click', async event => {
   const button = event.target.closest('button');
-  if (!button) return;
+  if (!button || (!button.dataset.audio && !button.dataset.retry)) return;
   if (button.dataset.audio) {
     const source = '/api/recordings/' + button.dataset.audio + '/audio';
     playback.hidden = false;
@@ -265,6 +289,121 @@ recordingList.addEventListener('click', async event => {
     button.disabled = false;
     await refreshRecordings();
   }
+});
+
+const feishuForm = document.querySelector('#feishu-form');
+const feishuNotice = document.querySelector('#feishu-notice');
+let feishuSettings;
+async function refreshFeishu() {
+  const response = await fetch('/api/feishu', {cache:'no-store'});
+  if (!response.ok) throw new Error('无法读取飞书状态。');
+  feishuSettings = await response.json();
+  document.querySelector('#feishu-status').textContent = !feishuSettings.configured ? '请配置企业自建应用和测试群。'
+    : `连接 ${feishuSettings.connection} · ${feishuSettings.chatId ? '测试群已绑定' : '请选择测试群和负责人'}${feishuSettings.error ? ' · ' + feishuSettings.error : ''}`;
+  if (!feishuForm.elements.appId.value) feishuForm.elements.appId.value = feishuSettings.appId;
+}
+
+async function feishuRequest(path) {
+  const response = await fetch(path);
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error);
+  return result;
+}
+
+async function loadMembers() {
+  const chatId = feishuForm.elements.chatId.value;
+  if (!chatId) return;
+  const people = await feishuRequest('/api/feishu/members?chatId=' + encodeURIComponent(chatId));
+  feishuForm.elements.ownerOpenId.innerHTML = '<option value="">请选择负责人</option>' + people.map(person =>
+    `<option value="${escape(person.openId)}">${escape(person.name)}</option>`).join('');
+  if (chatId === feishuSettings?.chatId) feishuForm.elements.ownerOpenId.value = feishuSettings.ownerOpenId;
+}
+
+document.querySelector('#load-chats').addEventListener('click', async () => {
+  try {
+    const chats = await feishuRequest('/api/feishu/chats');
+    feishuForm.elements.chatId.innerHTML = '<option value="">请选择测试群</option>' + chats.map(chat =>
+      `<option value="${escape(chat.chatId)}">${escape(chat.name)}</option>`).join('');
+    if (feishuSettings.chatId) feishuForm.elements.chatId.value = feishuSettings.chatId;
+    await loadMembers();
+    feishuNotice.textContent = chats.length ? '请选择用于验收的测试群和负责人。' : '应用尚未加入群，请先将机器人加入测试群。';
+  } catch (error) { feishuNotice.textContent = error.message; }
+});
+feishuForm.elements.chatId.addEventListener('change', () => loadMembers().catch(error => { feishuNotice.textContent = error.message; }));
+feishuForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  const button = event.submitter;
+  button.disabled = true;
+  feishuNotice.textContent = '正在核对飞书配置…';
+  const key = feishuForm.elements.appSecret;
+  try {
+    const appOnly = button.value === 'app';
+    const response = await fetch('/api/feishu', { method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({appId:feishuForm.elements.appId.value.trim(), appSecret:key.value.trim(),
+        chatId:appOnly ? feishuSettings?.chatId : feishuForm.elements.chatId.value,
+        ownerOpenId:appOnly ? feishuSettings?.ownerOpenId : feishuForm.elements.ownerOpenId.value}),
+    });
+    key.value = '';
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error);
+    feishuNotice.textContent = appOnly ? '应用已保存，可以读取测试群。' : '测试群和负责人已保存，可以准备录音任务。';
+    await refreshFeishu();
+  } catch (error) { feishuNotice.textContent = error.message; }
+  finally { key.value = ''; button.disabled = false; }
+});
+
+const taskList = document.querySelector('#task-list');
+let lastTasks;
+let refreshingTasks = false;
+async function refreshTasks() {
+  if (refreshingTasks) return;
+  refreshingTasks = true;
+  try {
+    const response = await fetch('/api/tasks', {cache:'no-store'});
+    if (!response.ok) throw new Error('无法读取执行台账。');
+    const snapshot = await response.text();
+    if (snapshot === lastTasks) return;
+    const tasks = JSON.parse(snapshot);
+    taskList.innerHTML = tasks.length ? '<ul class="events">' + tasks.map(task => {
+      const eligible = /接口/.test(task.source.evidence) && /(429|四二九|四百二十九)/.test(task.source.evidence);
+      const latest = task.rounds.at(-1);
+      const action = task.status === 'needs_review' && eligible ? 'prepare'
+        : task.ownerOpenId === 'local' && task.status === 'awaiting' ? 'approve'
+        : task.ownerOpenId === 'local' && task.status === 'interrupted' ? 'recover' : '';
+      const buttonText = action === 'prepare' ? '准备两轮接口执行方案' : action === 'recover' ? '恢复原会话执行' : '确认并执行';
+      return `<li><strong>${escape(task.title)}</strong> <span class="chip">${statuses[task.status] || '待核对'}</span>
+        <p class="small muted">任务 ${escape(task.taskId)} · 录音分工 ${escape(task.owner)}${task.ownerDisplayName ? ' · 确认负责人 ' + escape(task.ownerDisplayName) : ''} · 版本 ${task.version}</p>
+        <p>${timeButton(task.source.recordingId, task.source.startMs, task.source.endMs, task.source.timing)} ${escape(task.source.evidence)}</p>
+        ${latest ? `<p>已核验 ${latest.checks.filter(check=>check.passed).length}/${latest.checks.length} · ${task.rounds.length} 轮</p>` : ''}
+        ${task.proposal ? `<p><strong>${escape(task.proposal.title)}</strong><br>${escape(task.proposal.action)}</p>` : ''}
+        ${action ? `<button data-task="${escape(task.taskId)}" data-kind="${action}" data-version="${task.version}" data-proposal="${escape(task.proposal?.id)}">${buttonText}</button>` : ''}
+        ${task.ownerOpenId && task.ownerOpenId !== 'local' ? '<p class="small">请负责人在飞书任务卡片上确认。</p>' : ''}
+        ${task.card.messageId ? `<p class="small muted">已绑定飞书原卡片 ${escape(task.card.messageId)}</p>` : ''}
+        ${task.card.error ? `<p class="small">卡片同步待重试 · ${escape(task.card.error)}</p>` : ''}
+        ${task.sessionId ? `<p class="small muted">Codex 会话 ${escape(task.sessionId)}</p>` : ''}
+        ${task.rounds.length ? `<details><summary>查看执行轮次、快照和核验证据</summary>${task.rounds.map(round=>
+          `<p>第 ${round.round} 轮 · ${escape(round.summary)}</p><pre>${escape(round.code)}</pre><pre>${escape(JSON.stringify(round.checks,null,2))}</pre>`).join('')}</details>` : ''}
+        <details><summary>查看确认和任务事件</summary><pre>${escape(JSON.stringify({confirmations:task.confirmations,events:task.events},null,2))}</pre></details>
+      </li>`;
+    }).join('') + '</ul>' : '<p class="muted">录音中的行动项会自动进入这里。</p>';
+    lastTasks = snapshot;
+  } catch (error) { document.querySelector('#task-notice').textContent = error.message; }
+  finally { refreshingTasks = false; }
+}
+
+taskList.addEventListener('click', async event => {
+  const button = event.target.closest('button[data-task]');
+  if (!button) return;
+  button.disabled = true;
+  try {
+    const response = await fetch('/api/tasks/' + button.dataset.task, {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({kind:button.dataset.kind, version:Number(button.dataset.version), proposalId:button.dataset.proposal}),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error);
+    document.querySelector('#task-notice').textContent = '任务状态已保存。';
+  } catch (error) { document.querySelector('#task-notice').textContent = error.message; }
+  finally { button.disabled = false; await refreshTasks(); }
 });
 
 async function refreshSpeakmode() {
@@ -306,8 +445,10 @@ document.querySelector('#speakmode-form').addEventListener('submit', async event
 
 await Promise.all([refresh(), refreshRecordings(), refreshSpeakmode().catch(error => {
   document.querySelector('#speakmode-status').textContent = error.message;
-})]);
+}), refreshTasks(), refreshFeishu().catch(error => { document.querySelector('#feishu-status').textContent = error.message; })]);
 setInterval(refresh, 650);
 setInterval(refreshRecordings, 1000);
+setInterval(refreshTasks, 1000);
+setInterval(() => refreshFeishu().catch(() => {}), 2000);
 </script>
 </html>

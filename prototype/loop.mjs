@@ -11,8 +11,8 @@ export const transcript = {
   ],
 };
 
-export function initialState() {
-  return { taskId: 'T-057', status: 'ready', transcript, rounds: [], events: [], proposal: null, approvedProposal: null };
+export function initialState(input = {}) {
+  return { taskId: 'T-057', status: 'ready', transcript, rounds: [], events: [], proposal: null, approvedProposal: null, ...input };
 }
 
 function addEvent(state, actor, text) {
@@ -21,7 +21,7 @@ function addEvent(state, actor, text) {
 
 export function start(state) {
   return addEvent({ ...state, status: 'running' }, 'ANC Card / Personal Agent',
-    '导入模拟转写。工程 Personal Agent 创建 T-057，将接口示例委派给 Codex。');
+    `将任务 ${state.taskId} 的已确认范围委派给 Codex。`);
 }
 
 export function receiveResult(state, result) {
@@ -47,9 +47,9 @@ export function receiveResult(state, result) {
     id: randomUUID(), round, criterion: missing[0].id,
     title: '给现有接口示例补上 429 重试',
     action: '在原有 client.mjs 中增加 429 的单次重试，保留其他状态的原有行为。随后重跑验收脚本。',
-    reason: '模拟转写明确承诺 429 只重试一次。台账中的正常请求和调用说明已通过，429 验收失败。',
+    reason: '任务来源明确包含 429 单次重试。正常请求和调用说明已通过，429 验收失败。',
     acceptance: missing[0].label,
-    source: `${transcript.id} · ${transcript.time}`,
+    source: `${state.transcript.id} · ${state.transcript.time}`,
   };
   return addEvent({ ...next, status: 'awaiting', proposal }, '主 Agent', '对照原转写与台账，已拟好下一步，等待负责人确认。');
 }

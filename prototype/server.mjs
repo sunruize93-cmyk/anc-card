@@ -1,10 +1,9 @@
 import { createServer } from 'node:http';
-import { readFile, mkdtemp, realpath, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { extname, join } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { approve, blocked, initialState, receiveResult, start } from './loop.mjs';
-import { execute } from './worker.mjs';
+import { runTasks } from './task-runner.mjs';
+import { openFeishu } from './feishu.mjs';
 import { audioTypes, maxAudioBytes, openRecordings } from './recordings.mjs';
 import { configureSpeakmode, speakmodeStatus } from './speakmode.mjs';
 
@@ -12,11 +11,11 @@ const port = Number(process.env.ANC_PROTOTYPE_PORT || 4785);
 const address = '127.0.0.1';
 const host = `${address}:${port}`;
 const page = await readFile(new URL('./index.html', import.meta.url));
-const recordings = await openRecordings(process.env.ANC_DATA_DIR ||
-  fileURLToPath(new URL('../.anc-data/', import.meta.url)));
-let state = initialState();
-let directory;
-let pending = Promise.resolve();
+const dataDirectory = resolve(process.env.ANC_DATA_DIR || fileURLToPath(new URL('../.anc-data/', import.meta.url)));
+const recordings = await openRecordings(dataDirectory);
+const tasks = recordings.tasks;
+const runner = runTasks(tasks, dataDirectory);
+const feishu = await openFeishu(dataDirectory, tasks);
 
 function reply(response, status, data) {
   response.writeHead(status, {
@@ -25,18 +24,15 @@ function reply(response, status, data) {
   }).end(JSON.stringify(data));
 }
 
-function run() {
-  const task = state;
-  pending = (async () => {
-    try {
-      if (!directory) directory = await mkdtemp(join(await realpath(tmpdir()), 'anc-prototype-'));
-      const result = await execute(directory, task);
-      state = receiveResult(state, result);
-    } catch (error) {
-      console.error(error.message);
-      state = blocked(state, error.message);
-    }
-  })();
+async function jsonBody(request) {
+  const chunks = [];
+  let bytes = 0;
+  for await (const chunk of request) {
+    bytes += chunk.length;
+    if (bytes > 8192) throw Object.assign(new Error('请求过长。'), { status: 413 });
+    chunks.push(chunk);
+  }
+  return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 }
 
 async function importRecording(request, response) {
@@ -102,7 +98,38 @@ const server = createServer(async (request, response) => {
   if (request.method === 'GET' && request.url === '/') {
     return response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }).end(page);
   }
-  if (request.method === 'GET' && request.url === '/api/state') return reply(response, 200, state);
+  if (request.method === 'GET' && request.url === '/api/state') return reply(response, 200, tasks.get('T-057'));
+  if (request.method === 'GET' && request.url === '/api/tasks') return reply(response, 200, tasks.list().filter(task => task.origin === 'recording'));
+  const taskRoute = /^\/api\/tasks\/([A-Za-z0-9-]{1,80})$/.exec(request.url);
+  if (taskRoute && request.method === 'POST') {
+    try {
+      const action = await jsonBody(request);
+      const id = taskRoute[1];
+      let task;
+      if (action.kind === 'prepare') {
+        const binding = feishu.status();
+        if (binding.configured && (!binding.chatId || !binding.ownerOpenId)) throw new Error('请先保存飞书测试群和负责人。');
+        task = tasks.prepare(id, action.version, binding.ownerOpenId || 'local', binding.chatId || null, binding.ownerName || '本机负责人');
+      }
+      else if (['approve', 'recover'].includes(action.kind)) {
+        task = tasks.confirm({ taskId: id, version: action.version, proposalId: action.proposalId,
+          actor: 'local', channel: 'local', action: action.kind });
+      } else throw Object.assign(new Error('任务操作无效。'), { status: 400 });
+      return reply(response, 202, task);
+    } catch (error) { return reply(response, error.status || 400, { error: error.message }); }
+  }
+  if (request.url.startsWith('/api/feishu')) {
+    try {
+      const route = new URL(request.url, 'http://' + host);
+      if (route.pathname === '/api/feishu') {
+        if (request.method === 'GET') return reply(response, 200, feishu.status());
+        if (request.method === 'POST') return reply(response, 200, await feishu.configure(await jsonBody(request)));
+      }
+      if (request.method === 'GET' && route.pathname === '/api/feishu/chats') return reply(response, 200, await feishu.chats());
+      if (request.method === 'GET' && route.pathname === '/api/feishu/members') return reply(response, 200, await feishu.members(route.searchParams.get('chatId')));
+      return reply(response, 404, {});
+    } catch (error) { return reply(response, error.status || 400, { error: error.message }); }
+  }
   if (request.url === '/api/speakmode') {
     if (request.method === 'GET') return reply(response, 200, await speakmodeStatus());
     if (request.method === 'POST') {
@@ -144,41 +171,17 @@ const server = createServer(async (request, response) => {
   }
   if (request.method !== 'POST' || request.url !== '/api/action') return reply(response, 404, {});
   try {
-    const chunks = [];
-    let bytes = 0;
-    for await (const chunk of request) {
-      bytes += chunk.length;
-      if (bytes > 2048) return reply(response, 413, { error: '请求过长。' });
-      chunks.push(chunk);
-    }
-    const action = JSON.parse(Buffer.concat(chunks).toString('utf8'));
-    if (action.kind === 'start' && state.status === 'ready') {
-      state = start(state);
-      run();
-    } else if (action.kind === 'approve') {
-      const next = approve(state, action.proposalId);
-      if (!next) return reply(response, 409, { error: '这条建议已处理或过期。' });
-      state = next;
-      run();
-    } else if (action.kind === 'reset' && !['ready', 'running'].includes(state.status)) {
-      const previous = directory;
-      directory = undefined;
-      state = initialState();
-      if (previous) await rm(previous, { recursive: true });
-    } else {
-      return reply(response, 409, { error: '当前状态下无法执行这个操作。' });
-    }
-    return reply(response, 202, state);
-  } catch {
-    return reply(response, 400, { error: '无法处理这个请求。' });
+    return reply(response, 202, tasks.legacy(await jsonBody(request)));
+  } catch (error) {
+    return reply(response, error.status || 400, { error: error.message });
   }
 });
 server.listen(port, address, () => console.log(`ANC Card 原型  http://${host}`));
 async function stop() {
   await new Promise(resolve => server.close(resolve));
+  await runner.close();
+  await feishu.close();
   await recordings.close();
-  await pending;
-  if (directory) await rm(directory, { recursive: true });
   process.exit(0);
 }
 process.once('SIGINT', stop);

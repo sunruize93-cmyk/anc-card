@@ -1,0 +1,13 @@
+{
+  "name": "anc-card-prototype",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node prototype/server.mjs",
+    "verify": "node prototype/verify.mjs && node --test prototype/tasks.test.mjs"
+  },
+  "dependencies": {
+    "@larksuiteoapi/node-sdk": "1.76.0"
+  }
+}
