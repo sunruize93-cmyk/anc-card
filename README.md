@@ -2,6 +2,8 @@
 
 ANC Card 是五人团队的录音与任务台账原型。导入音频后，原文件先与排队记录一起写入 SQLite。后台调用 SpeakMode 的文件转写工具，把识别到的明确分工写入带出处的任务台账。点击时间范围可回听原录音，行动项初始状态为「待核对」。
 
+最新[协作构想与验收顺序](docs/architecture.md)：录音卡经 iPhone 自动上传后台，使用自有 SpeakMode＋百炼处理，再将任务交给飞书与对应 Personal Agent，保留验收反馈并沉淀团队知识。iPhone 自动同步等目标能力待录音卡到货后开发；当前已实现范围与待验收项在文档中分别列明。
+
 ## 本机运行
 
 需要 macOS、Node.js 22.13+、Rust stable、Git 和 Xcode Command Line Tools。在项目根目录执行以下命令，安装固定版本的 SpeakMode 文件转写工具，然后启动原型。
