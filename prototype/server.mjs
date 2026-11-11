@@ -15,7 +15,7 @@ const dataDirectory = resolve(process.env.ANC_DATA_DIR || fileURLToPath(new URL(
 const recordings = await openRecordings(dataDirectory);
 const tasks = recordings.tasks;
 const runner = runTasks(tasks, dataDirectory);
-const feishu = await openFeishu(dataDirectory, tasks);
+const feishu = await openFeishu(dataDirectory, tasks, recordings);
 
 function reply(response, status, data) {
   response.writeHead(status, {

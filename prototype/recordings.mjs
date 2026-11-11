@@ -6,6 +6,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { promisify } from 'node:util';
 import { splitWav, timingMethod, transcribeChunk } from './speakmode.mjs';
 import { openTasks } from './tasks.mjs';
+import { openFeishuInbox } from './feishu-inbox.mjs';
 
 const exec = promisify(execFile);
 export const maxAudioBytes = 64 * 1024 * 1024;
@@ -89,6 +90,7 @@ export async function openRecordings(directory) {
 
   const fields = 'id, name, createdAt, status, attempts, error, transcript, ledger';
   const tasks = openTasks(db);
+  const inbox = openFeishuInbox(db, audioTypes);
   const one = db.prepare(`SELECT ${fields} FROM recordings WHERE id = ?`);
   const all = db.prepare(`SELECT ${fields} FROM recordings ORDER BY createdAt DESC, rowid DESC`);
   const insert = db.prepare(`
@@ -152,6 +154,8 @@ export async function openRecordings(directory) {
   wake();
   return {
     tasks,
+    inbox,
+    get: id => { const row = one.get(id); return row ? decode(row) : null; },
     list: () => all.all().map(decode),
     import(name, audio) {
       const id = createHash('sha256').update(audio).digest('hex');

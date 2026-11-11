@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node prototype/server.mjs",
-    "verify": "node prototype/verify.mjs && node --test prototype/tasks.test.mjs"
+    "verify": "node prototype/verify.mjs && node --test prototype/tasks.test.mjs prototype/feishu-inbox.test.mjs"
   },
   "dependencies": {
     "@larksuiteoapi/node-sdk": "1.76.0"

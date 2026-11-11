@@ -49,9 +49,11 @@ summary{cursor:pointer;color:#2457c8;margin-top:7px}pre{overflow:auto;padding:10
   </section>
   <section class="card" style="margin-bottom:16px">
     <h2>飞书测试群</h2>
+    <p class="muted small">将录音 App 导出的 WAV、M4A、MP3 作为文件发到绑定测试群，后台使用 SpeakMode＋阿里云百炼转写，并在原消息下回复分段原文和行动项。单个文件最多 64 MiB。</p>
     <p id="feishu-status" role="status">正在检查飞书连接…</p>
     <details><summary>配置企业自建应用和负责人</summary>
-      <p class="muted small">应用需开启机器人能力，配置发送消息、更新卡片、读取群及群成员权限。在回调配置中订阅 card.action.trigger，选择长连接接收。</p>
+      <p class="muted small">应用需开启机器人能力，配置发送消息、更新卡片、读取群及群成员权限。订阅 card.action.trigger 回调和 im.message.receive_v1 事件，使用长连接。测试群接收附件还需群消息读取及消息资源下载权限，发布应用后生效。</p>
+      <p class="muted small">绑定群中的用户音频文件会自动进入百炼转写。原生语音消息暂不支持，请发送导出的音频文件。</p>
       <p class="small"><a href="https://open.feishu.cn/app/" target="_blank" rel="noreferrer">飞书开发者后台</a></p>
       <form id="feishu-form">
         <p><label>App ID <input name="appId" required autocomplete="off"></label></p>
@@ -299,7 +301,7 @@ async function refreshFeishu() {
   if (!response.ok) throw new Error('无法读取飞书状态。');
   feishuSettings = await response.json();
   document.querySelector('#feishu-status').textContent = !feishuSettings.configured ? '请配置企业自建应用和测试群。'
-    : `连接 ${feishuSettings.connection} · ${feishuSettings.chatId ? '测试群已绑定' : '请选择测试群和负责人'}${feishuSettings.error ? ' · ' + feishuSettings.error : ''}`;
+    : `连接 ${feishuSettings.connection} · ${feishuSettings.chatId ? '测试群已绑定' : '请选择测试群和负责人'} · 音频收件待处理 ${feishuSettings.audioInbox.pending} / 回写或下载异常 ${feishuSettings.audioInbox.errors}${feishuSettings.error ? ' · ' + feishuSettings.error : ''}`;
   if (!feishuForm.elements.appId.value) feishuForm.elements.appId.value = feishuSettings.appId;
 }
 

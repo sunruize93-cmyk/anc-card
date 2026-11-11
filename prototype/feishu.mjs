@@ -2,6 +2,8 @@ import * as lark from '@larksuiteoapi/node-sdk';
 import { readFile, rename, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { syncInbox } from './feishu-inbox.mjs';
+import { maxAudioBytes } from './recordings.mjs';
 
 const logger = { error() {}, warn() {}, info() {}, debug() {}, trace() {} };
 const labels = { needs_review: '待核对', awaiting: '待负责人确认', queued: '已入执行队列',
@@ -54,7 +56,7 @@ async function call(request) {
   }
 }
 
-export async function openFeishu(directory, tasks) {
+export async function openFeishu(directory, tasks, recordings) {
   const path = join(directory, 'feishu.json');
   let config;
   try { config = JSON.parse(await readFile(path, 'utf8')); }
@@ -75,6 +77,7 @@ export async function openFeishu(directory, tasks) {
       onReady: () => { errorMessage = ''; }, onReconnected: () => { errorMessage = ''; } });
     socket.start({ eventDispatcher: new lark.EventDispatcher({ logger }).register({
       'card.action.trigger': data => receiveCardAction(data, config, tasks),
+      'im.message.receive_v1': data => { recordings.inbox.receive(data, config); },
     }) }).catch(() => { errorMessage = '飞书长连接未能建立。'; });
   }
 
@@ -111,12 +114,14 @@ export async function openFeishu(directory, tasks) {
         tasks.deliveryFailed(task.taskId, error.message);
       }
     }
+    await syncInbox({ inbox: recordings.inbox, recordings, client, config, call, maxBytes: maxAudioBytes });
   }
   const timer = setInterval(() => { if (!pending) pending = sync().finally(() => { pending = undefined; }); }, 1200);
 
   return {
     status: () => ({ configured: !!config, appId: config?.appId || '', chatId: config?.chatId || '',
-      ownerOpenId: config?.ownerOpenId || '', ownerName: config?.ownerName || '', connection: socket?.getConnectionStatus().state || 'idle', error: errorMessage }),
+      ownerOpenId: config?.ownerOpenId || '', ownerName: config?.ownerName || '', connection: socket?.getConnectionStatus().state || 'idle', error: errorMessage,
+      audioInbox: recordings.inbox.status() }),
     async configure(input) {
       if (configuring) throw new Error('飞书配置正在更新，请稍后再试。');
       configuring = true;
@@ -126,7 +131,7 @@ export async function openFeishu(directory, tasks) {
           chatId: input.chatId || null, ownerOpenId: input.ownerOpenId || null };
         if (!/^cli_[A-Za-z0-9_-]+$/.test(next.appId || '') || typeof next.appSecret !== 'string' ||
             !next.appSecret.trim() || next.appSecret.length > 4096) throw new Error('请填写有效的 App ID 和 App Secret。');
-        if (tasks.list().some(task => task.origin === 'recording' && task.ownerOpenId && task.ownerOpenId !== 'local') &&
+        if ((recordings.inbox.hasBindings() || tasks.list().some(task => task.origin === 'recording' && task.ownerOpenId && task.ownerOpenId !== 'local')) &&
             (next.appId !== config?.appId || next.chatId !== config?.chatId)) throw new Error('已有任务卡片绑定当前应用和群，请保留其绑定。');
         const api = newClient(next);
         if (next.chatId) {
