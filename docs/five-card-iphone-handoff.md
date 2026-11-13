@@ -1,12 +1,36 @@
-# 朋友的开发清单 · ANC Card 录音卡和 iPhone · 2026-11-14
+# 朋友的开发清单 · Windows / macOS 联调录音卡与 iPhone · 2026-11-14
 
 ## 给接手的 Codex
 
 请从[ANC Card 公共仓库](https://github.com/sunruize93-cmyk/anc-card)开始。你的交付是一个能装到测试 iPhone 的最小客户端：识别指定卡、在机身保存录音后自动取回、落盘、上传、显示后台回执。另用官方“声云语音转写”测试三条口令，并交出官方原稿与对应原件。队友负责 SpeakMode＋百炼、飞书及后台。可从本文独立开工。
 
-- [ ] 在自己的 Mac 检查 `xcodebuild -version`、`xcode-select -p`、iPhone 的系统版本、开发者模式、签名和真机运行。先让最小 App 在手机上启动并取得蓝牙权限。现场人员负责解锁、授权、按键、录音和确认指示灯；Codex 负责实现、读取日志、核对文件和记录结果。
-- [ ] 检查工作区和现有 iOS 代码。若已有客户端就沿用；若缺少，创建独立 iOS 目录和 Swift/Core Bluetooth 真机目标。提交时仅包含源码和可复用说明。现场录音、逐字稿、设备标识和凭证保存在私有测试目录。
-- [ ] 对接人提供测试上传地址、绑定凭证及样例回执。共享仓库中 `prototype/server.mjs`、`prototype/recordings.mjs` 可核对现有文件支持。等地址期间先完成蓝牙取回、校验、持久化队列和本地回执模拟；交付时分别标明模拟和真实后端结果。
+### 从你的电脑开始
+
+朋友用 Windows 时按下面的 PowerShell 步骤起步。你可以独立完成 USB 读盘、桌面 BLE 文件下载、哈希核对、上传与重传验证，并在自己的 iPhone 上使用官方 App。自有 iPhone 客户端的源码可以在 Windows 上编辑；把源码和样本记录交给项目负责人的 Mac，由双方用完整 Xcode 构建、签名、安装，再在 iPhone 上测实际的后台行为。[Apple Xcode 系统要求](https://developer.apple.com/xcode/system-requirements)
+
+1. 在 PowerShell 中运行以下命令。如果已有项目副本，只需进入项目目录。确认 Windows 蓝牙已开启，电脑有可用的 BLE 适配器。USB 线连接时先用资源管理器核对录音卡的盘符和 `record` 文件夹。
+
+```powershell
+git clone https://github.com/sunruize93-cmyk/anc-card.git
+Set-Location anc-card
+Get-Volume | Select-Object DriveLetter, FileSystemLabel, FileSystem, SizeRemaining
+```
+
+2. 把一条自制 WAV 从卡复制到本地私有测试目录后记录大小和哈希。下面的路径由文件选择者输入，可直接粘贴资源管理器中的完整路径。
+
+```powershell
+$wav = (Read-Host '本地测试 WAV 的完整路径').Trim('"')
+(Get-Item -LiteralPath $wav).Length
+(Get-FileHash -Algorithm SHA256 -LiteralPath $wav).Hash.ToLowerInvariant()
+```
+
+3. 安全弹出后拔线并唤醒 A 卡。在 Windows 的 Edge 或 Chrome 打开[厂商 BLE 测试页](https://nextproto.top/qs668/)，点连接，在系统选择器中选 A。先读电量和固件，再列文件、下载新口令、播放并核对大小。设备未出现时，先让其他手机或浏览器断开该卡，检查系统蓝牙、适配器驱动及浏览器授权。USB 样本可先供队友做转写对照。
+4. 厂商测试页足够时直接使用。若需可重复的桌面下载工具，可在 Windows 原生 Python 环境使用 Bleak 的 WinRT 后端实现第 2 节协议并记录结果。退出桌面连接，再让 iPhone 接管同一张卡。[Bleak Windows 文档](https://bleak.readthedocs.io/en/latest/backends/windows.html)
+5. 若朋友也有 Mac，可直接在该机继续。用 Finder 复制 WAV，用 `shasum -a 256 "/实际路径/样本.wav"` 核对原件。负责构建的 Mac 先检查 `xcode-select -p` 和 `xcodebuild -version`，选择与 macOS、手机系统匹配的完整 Xcode。现场准备测试 iPhone 的信任、开发者模式、签名团队和唯一 Bundle ID，先编译运行最小 App，验证蓝牙授权。
+6. 从 Windows 向 Mac 交接时，提供分支和提交号（或源码包）、运行说明、同一测试文件的哈希及 BLE 返回码。Mac 打开相同版本，现场真机执行第 4 节。若当天 Xcode 或签名尚未就绪，先交付五卡表、官方原稿、桌面下载和后台上传实测；“自有 iPhone 前台 / 锁屏 / 离线恢复”分别保留为待测。
+
+- [ ] Codex 先查看已有代码；沿用已有 iOS 目录或新建最小 Swift/Core Bluetooth 客户端。每次实测注明发送端是 Windows、Mac 或 iPhone。现场人员负责解锁手机、授权、操作机身按键。源码与可复用说明放仓库，原音、逐字稿、设备标识及凭证留在私有目录。
+- [ ] 对接人提供实际 HTTPS 地址、短期绑定凭证及样例回执。先把桌面取回的文件用双方约定的字段发送一次，核对录音 ID 和哈希，然后重传同一文件；手机端独立重复这轮验证。后台 SpeakMode、百炼和飞书继续在项目负责人的 Mac 环境运行。
 
 ## 1 · 卡片基线与激活
 
@@ -61,4 +85,4 @@
 
 ## 收工发给队友
 
-交付可从 Xcode 真机运行的代码版本和操作说明、五卡表、Q1–Q3 原音与官方逐字稿的私有位置，以及三种手机状态的回执。每条实测附卡号、iOS/App/固件版本、样本 ID、字节数、SHA-256、recordingId、时间。每项填写“通过 / 失败 / 待测”。失败给出最后成功的一步、相关返回码和一条复现方法。两个人共同核对从机身保存到飞书群消息的第一条完整记录。
+交付桌面 BLE 结果、iOS 源码版本和 Mac 构建状态、五卡表、Q1–Q3 原音与官方逐字稿的私有位置，以及三种手机状态的回执。每条实测附卡号、iOS/App/固件版本、样本 ID、字节数、SHA-256、recordingId、时间。每项填写“通过 / 失败 / 待测”。失败给出最后成功的一步、相关返回码和一条复现方法。两个人共同核对从机身保存到飞书群消息的第一条完整记录。
