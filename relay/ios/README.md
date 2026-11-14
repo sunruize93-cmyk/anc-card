@@ -8,6 +8,10 @@
 
 这不是两小时会议、所有机型、强退 App 后自动恢复的保证。稳定验收路径为 WAV；OPUS、删除旧录音和实时通道相关代码仍有实验开关，不能因源码存在就算产品功能通过。
 
+## 11 月 15 日长录音边界
+
+Mac 后台已支持 256 MiB；当前已安装 App 的蓝牙下载仍限制 64 MiB。本轮只更新后台，没有安装新 App 或改动手机。地址、凭证有效期和测试 CA 的续期文件已在 Mac 准备，需用户录音保存后再导入手机。今天一小时录音先通过 USB 原音导入，详见 [长录音准备](../../docs/long-recording-readiness-2026-11-15.md)。
+
 ## 构建与安装
 
 用完整 Xcode 打开 `ANCRelay/ANCRelay.xcodeproj`，选择 ANCRelay scheme、自己的签名团队和唯一 Bundle ID，再选真机运行。工程最低部署目标为 iOS 17；不要求 XcodeGen。手机必须按系统提示完成信任和开发者模式设置。当前不走 TestFlight。

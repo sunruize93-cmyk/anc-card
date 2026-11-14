@@ -1,4 +1,5 @@
 import {validateAudioDeclaration} from './audio/qs668.mjs';
+import { uploadTimeoutMs } from './audio-limits.mjs';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, resolve } from 'node:path';
@@ -66,7 +67,7 @@ async function importRecording(request, response) {
   if (!Number.isSafeInteger(declared) || declared < 1) {
     return reply(response, 411, { error: '请上传大小已知的非空音频文件。' });
   }
-  if (declared > maxAudioBytes) return reply(response, 413, { error: '单个文件最多 64 MiB。' });
+  if (declared > maxAudioBytes) return reply(response, 413, { error: '单个文件最多 256 MiB。' });
   const chunks = [];
   let received = 0;
   for await (const chunk of request) {
@@ -267,6 +268,7 @@ const server = createServer(async (request, response) => {
     return reply(response, error.status || 400, { error: error.message });
   }
 });
+server.requestTimeout = uploadTimeoutMs;
 server.listen(port, address, () => console.log(`ANC Card 原型  http://${host}`));
 async function stop() {
   await new Promise(resolve => server.close(resolve));

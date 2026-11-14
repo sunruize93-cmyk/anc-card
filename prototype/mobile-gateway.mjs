@@ -1,9 +1,10 @@
+import {maxAudioBytes, uploadTimeoutMs} from './audio-limits.mjs';
 import {validateAudioDeclaration, validateRawOpus, rawOpusFormat, maxRawBytes} from './audio/qs668.mjs';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 
 const hash = value => createHash('sha256').update(value).digest();
-export function createMobileHandler({ config, db, upstream, host, fetcher = fetch, documentService = null }) {
+export function createMobileHandler({ config, db, upstream, host, fetcher = fetch, documentService = null, loadConfig = () => config }) {
   db.exec(`CREATE TABLE IF NOT EXISTS receipts (device TEXT, localId TEXT, sha256 TEXT NOT NULL,
     size INTEGER NOT NULL, PRIMARY KEY(device, localId));
     CREATE TABLE IF NOT EXISTS upload_events (at TEXT NOT NULL, device TEXT NOT NULL,
@@ -12,7 +13,7 @@ export function createMobileHandler({ config, db, upstream, host, fetcher = fetc
   const allowedRecording = id => !!db.prepare('SELECT 1 FROM receipts WHERE device=? AND sha256=?').get(config.device, id);
   const inflight = new Set();
   const attempts = new Map();
-  const limit = 64 * 1024 * 1024;
+  const limit = maxAudioBytes;
   const headers = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer',
     'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'" };
   return async (req, res) => {
@@ -24,6 +25,8 @@ export function createMobileHandler({ config, db, upstream, host, fetcher = fetc
     };
     if (req.headers.host !== host || (req.headers.origin && req.headers.origin !== 'https://' + host)) return reply(403, { error: '请求来源无效' });
     try {
+      // Snapshot credentials per request; atomic renewal/revocation applies without restart.
+      const config = loadConfig();
       if (req.method === 'GET' && ['/', '/upload.js'].includes(req.url)) {
         const page = req.url === '/';
         return res.writeHead(200, { ...headers, 'Content-Type': page ? 'text/html; charset=utf-8' : 'text/javascript; charset=utf-8' })
@@ -95,14 +98,14 @@ export function createMobileHandler({ config, db, upstream, host, fetcher = fetc
       const localId = req.headers['x-recording-id'], digest = req.headers['x-content-sha256'], filename = req.headers['x-anc-filename'];
       const size = Number(req.headers['content-length']);
       if (!/^[A-Za-z0-9_-]{1,100}$/.test(localId || '') || !/^[a-f0-9]{64}$/.test(digest || '') || !filename) return reply(400, { error: '缺少录音标识、文件名或 SHA-256' });
-      if (!Number.isSafeInteger(size) || size < 1 || size > limit) return reply(413, { error: '请选择不超过 64 MiB 的音频' });
+      if (!Number.isSafeInteger(size) || size < 1 || size > limit) return reply(413, { error: '请选择不超过 256 MiB 的音频' });
       const audioFormat = req.headers['x-anc-audio-format'];
       try { validateAudioDeclaration(decodeURIComponent(filename), audioFormat, req.headers['content-type']); }
       catch (error) { return reply(error.status || 400, {error:error.message}); }
       if (audioFormat === rawOpusFormat && size > maxRawBytes) return reply(413, {error:'QS668 音频最多两小时'});
       const previous = lookup.get(config.device, localId);
       if (previous && previous.sha256 !== digest) return reply(409, { error: '录音标识已绑定不同文件' });
-      if (inflight.has(localId) || inflight.size >= 2) return reply(429, { error: '上传进行中，请稍后重试' });
+      if (inflight.has(localId) || inflight.size >= 1) return reply(429, { error: '上传进行中，请稍后重试' });
       inflight.add(localId);
       try {
         const file = await bytes(size);
@@ -112,7 +115,7 @@ export function createMobileHandler({ config, db, upstream, host, fetcher = fetc
         }
         const r = await fetcher(upstream, { method: 'POST', headers: { 'X-ANC-Filename': filename,
           'X-ANC-Publish': '1', 'X-ANC-Device': config.device,
-          ...(audioFormat ? {'X-ANC-Audio-Format':audioFormat,'Content-Type':'application/octet-stream'} : {}) }, body: file, signal: AbortSignal.timeout(60000) });
+          ...(audioFormat ? {'X-ANC-Audio-Format':audioFormat,'Content-Type':'application/octet-stream'} : {}) }, body: file, signal: AbortSignal.timeout(uploadTimeoutMs) });
         if (!r.ok) return reply(r.status >= 500 ? 502 : r.status, { error: '后台未接收，请检查音频格式及群配置' });
         const body = await r.json();
         if (body.recording?.id !== digest) return reply(502, { error: '后台回执与原件不符' });

@@ -31,7 +31,7 @@ async function status() {
 $('upload').onclick = async () => {
   const file = $('file').files[0];
   if (!file) { $('status').textContent = '请先选择音频。'; return; }
-  if (!file.size || file.size > 64 * 1024 * 1024 || !/\.(wav|m4a|mp3)$/i.test(file.name)) { $('status').textContent = '请选择不超过 64 MiB 的 WAV、M4A 或 MP3。'; return; }
+  if (!file.size || file.size > 256 * 1024 * 1024 || !/\.(wav|m4a|mp3)$/i.test(file.name)) { $('status').textContent = '请选择不超过 256 MiB 的 WAV、M4A 或 MP3。'; return; }
   $('upload').disabled = true; clearTimeout(timer);
   try {
     $('status').textContent = '校验原文件并上传，请保持 Safari 在前台…';

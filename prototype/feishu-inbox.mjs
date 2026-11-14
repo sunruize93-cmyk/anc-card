@@ -71,7 +71,7 @@ export async function downloadAudio(client, row, maxBytes) {
   try {
     for await (const chunk of stream) {
       size += chunk.length;
-      if (size > maxBytes) throw new InvalidAudio('单个音频文件最多 64 MiB，请分段后发送。');
+      if (size > maxBytes) throw new InvalidAudio(`单个音频文件最多 ${maxBytes >= 1048576 ? `${maxBytes / 1048576} MiB` : `${maxBytes} 字节`}，请分段后发送。`);
       chunks.push(Buffer.from(chunk));
     }
     if (!size) throw new InvalidAudio('音频文件为空，请检查后重新发送。');

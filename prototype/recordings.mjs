@@ -2,7 +2,7 @@ import { decodeRawOpus, rawOpusFormat, validateRawOpus } from './audio/qs668.mjs
 import { openCoffeeDrills } from './coffee-drill.mjs';
 import { execFile } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { promisify } from 'node:util';
@@ -13,7 +13,8 @@ import { openFeishuInbox } from './feishu-inbox.mjs';
 import { openRecordingDelivery } from './recording-delivery.mjs';
 
 const exec = promisify(execFile);
-export const maxAudioBytes = 64 * 1024 * 1024;
+import { maxAudioBytes } from './audio-limits.mjs';
+export { maxAudioBytes } from './audio-limits.mjs';
 export const audioTypes = { '.wav': 'audio/wav', '.m4a': 'audio/mp4', '.mp3': 'audio/mpeg', '.opus': 'application/octet-stream' };
 
 async function transcribe(audio, extension, scratch, signal, cache, profile, audioFormat, saveDecode, recognize) {
@@ -35,6 +36,7 @@ async function transcribe(audio, extension, scratch, signal, cache, profile, aud
     } catch {
       throw new Error('音频转换失败。请检查文件能否播放以及格式是否正确。');
     }
+    if ((await stat(wav)).size > maxAudioBytes) throw new Error('标准化后的 WAV 超过 256 MiB，请先无损分段并保留原音。');
     normalized = await readFile(wav);
     }
     const segments = [];
@@ -199,6 +201,7 @@ export async function openRecordings(directory, { transcribeSegment = transcribe
     list: () => all.all().map(decode),
     coffeeDrills: openCoffeeDrills(db, tasks),
     import(name, audio, { audioFormat = null } = {}) {
+      if (!audio?.length || audio.length > maxAudioBytes) throw Object.assign(Error('音频须为非空且不超过 256 MiB'), {status:413});
       if (audioFormat !== null && audioFormat !== rawOpusFormat) throw Object.assign(Error('UNSUPPORTED_AUDIO_FORMAT'), {status:415});
       if (audioFormat === rawOpusFormat) validateRawOpus(audio);
       else if (extname(name).toLowerCase() === '.opus') throw Object.assign(Error('RAW_OPUS_REQUIRES_EXPLICIT_FORMAT'), {status:415});

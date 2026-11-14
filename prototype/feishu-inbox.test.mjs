@@ -150,7 +150,7 @@ test('超限或原生语音消息给出明确提示；失败录音不阻塞后�
     inbox.receive(message(), config);
     await syncInbox({ inbox, config, call, ...f, maxBytes: 2 });
     assert.equal(f.rows.size, 0);
-    assert.match(f.replies[0].data.content, /64 MiB/);
+    assert.match(f.replies[0].data.content, /2 字节/);
     const voice = message('om_voice'); voice.message.message_type = 'audio';
     inbox.receive(voice, config);
     await syncInbox({ inbox, config, call, ...f, maxBytes: 1024 });
