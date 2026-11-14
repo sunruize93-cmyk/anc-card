@@ -1,0 +1,4 @@
+# Keep reviewed Windows source readable with stable cross-platform diffs.
+relay/desktop/** text eol=lf
+# Unified patch context lines intentionally contain a single prefix space.
+*.patch whitespace=-blank-at-eol

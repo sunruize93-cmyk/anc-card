@@ -1,0 +1,412 @@
+{
+  "id": "G3",
+  "group": "下载收尾",
+  "provenance": "全部合成：音频是静音 WAV，时序、重复帧、应答序号都是构造的。2-5 结束码 0 的格式与实测一致。",
+  "variants": [
+    {
+      "name": "A 2-5 成功后：重复的 2-5 迟到，并与紧接着的电量、录音状态应答交错",
+      "sequence": [
+        "pull:note20261114-100000.",
+        "read_status",
+        "read_record_state"
+      ],
+      "card": {
+        "files": [
+          {
+            "from_ms": 0,
+            "names": [
+              "note20261114-100000."
+            ]
+          }
+        ],
+        "end_extra_delay_ms": 40,
+        "duplicate_end_after_ms": 15,
+        "reply_delay_ms": 5,
+        "record_state": [
+          {
+            "from_ms": 0,
+            "state": 2
+          }
+        ]
+      },
+      "expect": {
+        "pull_bytes": "wav",
+        "status_battery": 99,
+        "record_state": "idle",
+        "parser_buffers_empty": true
+      }
+    },
+    {
+      "name": "B 应答序号和请求序号无关（打乱）",
+      "sequence": [
+        "read_status",
+        "list",
+        "pull:note20261114-100000.",
+        "read_record_state"
+      ],
+      "card": {
+        "reply_seq": "scrambled",
+        "files": [
+          {
+            "from_ms": 0,
+            "names": [
+              "note20261114-100000."
+            ]
+          }
+        ],
+        "record_state": [
+          {
+            "from_ms": 0,
+            "state": 1
+          }
+        ]
+      },
+      "expect": {
+        "status_battery": 99,
+        "list": [
+          "note20261114-100000."
+        ],
+        "pull_bytes": "wav",
+        "record_state": "recording",
+        "parser_buffers_empty": true
+      }
+    },
+    {
+      "name": "C 上一轮的 2-18 迟到，并且在本轮请求之前已经到达",
+      "sequence": [
+        "list",
+        "sleep:1500",
+        "list"
+      ],
+      "card": {
+        "files": [
+          {
+            "from_ms": 0,
+            "names": [
+              "note20261114-090000.",
+              "note20261114-100000."
+            ]
+          }
+        ],
+        "list_end_delay_ms_by_call": [
+          2200,
+          0
+        ]
+      },
+      "expect": {
+        "lists": [
+          [
+            "note20261114-090000.",
+            "note20261114-100000."
+          ],
+          [
+            "note20261114-090000.",
+            "note20261114-100000."
+          ]
+        ],
+        "report_last": {
+          "ended_by": "2-18"
+        }
+      },
+      "fixed": "本轮修复：list_files 发 2-0 前先取出已排队的旧 2-1/2-18；还没收到本轮 2-1 时来的 2-18 一律不当结束。修复前的失败见 evidence/before.txt。"
+    },
+    {
+      "name": "D 同一通道上残留半帧（截断的通知）之后的电量应答",
+      "known_gap": "厂商 FrameParser 按帧头里的 LEN 等够字节才出帧，没有超时；CardLink 在一次连接内不清空解析缓冲。截断的帧头会让后面的短应答一直卡住。BLE 正常连接里通知不会被截断，半帧一般只在断开时出现，而断开后 CardLink 会整个重建，所以现实中出现的概率未知。",
+      "sequence": [
+        "read_status"
+      ],
+      "card": {
+        "files": [
+          {
+            "from_ms": 0,
+            "names": []
+          }
+        ],
+        "unsolicited": [
+          {
+            "at_ms": 0,
+            "channel": "ae23",
+            "raw_hex": "5a 07 12 34 c8 00 02 04 00 01 02 03"
+          }
+        ]
+      },
+      "expect": {
+        "status_battery": 99
+      }
+    },
+    {
+      "name": "E 上一轮的 2-18 在本轮 2-0 发出之后、本轮 2-1 之前才到",
+      "sequence": [
+        "list",
+        "sleep:100",
+        "list"
+      ],
+      "card": {
+        "reply_delay_ms": 300,
+        "files": [
+          {
+            "from_ms": 0,
+            "names": [
+              "note20261114-090000.",
+              "note20261114-100000."
+            ]
+          }
+        ],
+        "list_end_delay_ms_by_call": [
+          1500,
+          0
+        ]
+      },
+      "expect": {
+        "lists": [
+          [
+            "note20261114-090000.",
+            "note20261114-100000."
+          ],
+          [
+            "note20261114-090000.",
+            "note20261114-100000."
+          ]
+        ],
+        "report_last": {
+          "orphan_ends": 1,
+          "ended_by": "2-18"
+        },
+        "late_list_ends_after": 0
+      }
+    },
+    {
+      "name": "F 上一轮的 2-18 在本轮 2-1 之后才到（新旧结束帧无法区分）",
+      "sequence": [
+        "list",
+        "sleep:200",
+        "list"
+      ],
+      "card": {
+        "files": [
+          {
+            "from_ms": 0,
+            "names": [
+              "note20261114-090000.",
+              "note20261114-100000."
+            ]
+          }
+        ],
+        "list_end_delay_ms_by_call": [
+          1500,
+          0
+        ]
+      },
+      "expect": {
+        "lists": [
+          [
+            "note20261114-090000.",
+            "note20261114-100000."
+          ],
+          [
+            "note20261114-090000.",
+            "note20261114-100000."
+          ]
+        ],
+        "report_last": {
+          "ended_by": "2-18"
+        },
+        "late_list_ends_after": 0,
+        "note": "上一轮靠空闲结束，链路记着一笔可能迟到的 2-18；本轮 2-1 之后的第一个 2-18 先当可能是旧的，继续收，等到第二个 2-18 才结束"
+      }
+    },
+    {
+      "name": "G 只收到孤立的 2-18、始终没有 2-1：受限重试后报不确定，不返回空列表",
+      "sequence": [
+        "list"
+      ],
+      "card": {
+        "files": [
+          {
+            "from_ms": 0,
+            "names": []
+          }
+        ],
+        "on_command": {
+          "2-0": [
+            [
+              {
+                "channel": "ae22",
+                "delay_ms": 5,
+                "frames": [
+                  {
+                    "type": 2,
+                    "cmd": 18,
+                    "params_hex": "00",
+                    "seq": 0
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      },
+      "expect": {
+        "list_error": "ListUncertain",
+        "report_last": {
+          "attempts": 2,
+          "orphan_ends": 2
+        },
+        "late_list_ends_after": 0
+      }
+    },
+    {
+      "name": "H 第一次只收到孤立的 2-18，重试一次后拿到正常列表",
+      "sequence": [
+        "list"
+      ],
+      "card": {
+        "files": [
+          {
+            "from_ms": 0,
+            "names": []
+          }
+        ],
+        "on_command": {
+          "2-0": [
+            [
+              {
+                "channel": "ae22",
+                "delay_ms": 5,
+                "frames": [
+                  {
+                    "type": 2,
+                    "cmd": 18,
+                    "params_hex": "00",
+                    "seq": 0
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "channel": "ae22",
+                "delay_ms": 5,
+                "frames": [
+                  {
+                    "type": 2,
+                    "cmd": 1,
+                    "params_hex": "00000001000000010000032c6e6f746532303236313131342d3130303030302e",
+                    "seq": 1
+                  },
+                  {
+                    "type": 2,
+                    "cmd": 18,
+                    "params_hex": "00",
+                    "seq": 1
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      },
+      "expect": {
+        "lists": [
+          [
+            "note20261114-100000."
+          ]
+        ],
+        "report_last": {
+          "attempts": 2,
+          "orphan_ends": 1,
+          "ended_by": "2-18"
+        }
+      }
+    },
+    {
+      "name": "I 某一轮的 2-18 丢了（从没到），之后连续三轮正常：欠账要能自己清掉",
+      "sequence": [
+        "list",
+        "list",
+        "list",
+        "list"
+      ],
+      "card": {
+        "files": [
+          {
+            "from_ms": 0,
+            "names": []
+          }
+        ],
+        "on_command": {
+          "2-0": [
+            [
+              {
+                "channel": "ae22",
+                "delay_ms": 5,
+                "frames": [
+                  {
+                    "type": 2,
+                    "cmd": 1,
+                    "params_hex": "00000001000000010000032c6e6f746532303236313131342d3130303030302e",
+                    "seq": 0
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "channel": "ae22",
+                "delay_ms": 5,
+                "frames": [
+                  {
+                    "type": 2,
+                    "cmd": 1,
+                    "params_hex": "00000001000000010000032c6e6f746532303236313131342d3130303030302e",
+                    "seq": 1
+                  },
+                  {
+                    "type": 2,
+                    "cmd": 18,
+                    "params_hex": "00",
+                    "seq": 1
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      },
+      "expect": {
+        "lists": [
+          [
+            "note20261114-100000."
+          ],
+          [
+            "note20261114-100000."
+          ],
+          [
+            "note20261114-100000."
+          ],
+          [
+            "note20261114-100000."
+          ]
+        ],
+        "reports": [
+          {
+            "ended_by": "idle"
+          },
+          {
+            "ended_by": "idle",
+            "ambiguous_end": true
+          },
+          {
+            "ended_by": "2-18"
+          },
+          {
+            "ended_by": "2-18"
+          }
+        ],
+        "late_list_ends_after": 0,
+        "note": "第 1 轮没等到 2-18，记欠账 1；第 2 轮的 2-18 先当旧的抵账、空闲结束，不再加欠账；第 3、4 轮恢复正常，靠 2-18 结束"
+      }
+    }
+  ]
+}

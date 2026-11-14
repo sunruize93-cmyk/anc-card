@@ -7,6 +7,7 @@ import { chmod, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promis
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
 import { setTimeout as delay } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import { parseReceipt, splitWav } from './speakmode.mjs';
@@ -100,10 +101,10 @@ if (await control('block-at') === index) {
   await writeFile(join(root,'blocked-pid'), String(process.pid));
   while (await control('block-at') === index) await delay(100);
 }
-const texts = ['今天开会，测试环境已经准备好了。', '由小王负责整理会议纪要，截止时间是本周五。',
-  '接着确认下周的安排。', '由小李负责更新测试文档，截止时间是下周一。', '今天讨论到这里。'];
+const texts = ['今天开会，测试环境已经准备好了。', '由Zoty负责整理会议纪要，截止时间是本周五。',
+  '接着确认下周的安排。', '由Eric.s负责更新测试文档，截止时间是下周一。', '今天讨论到这里。'];
 const attemptId = randomUUID();
-const metadata = { attemptId, audioSha256:createHash('sha256').update(audio).digest('hex'), audioSamples:(audio.length-44)/2 };
+const metadata = { attemptId, language:args['--language'], audioSha256:createHash('sha256').update(audio).digest('hex'), audioSamples:(audio.length-44)/2 };
 const source = { id:randomUUID(), asrAttemptId:attemptId, provider:'aliyun',model:'qwen3-asr-flash',
   adapterVersion:'qwen-file-lab-v1',complete:true,items:[{text:texts[index],final:true}] };
 await writeFile(args['--out'], JSON.stringify({...metadata,status:'started'})+'\\n'+JSON.stringify({...metadata,status:'passed',source})+'\\n');
@@ -133,13 +134,25 @@ await writeFile(args['--out'], JSON.stringify({...metadata,status:'started'})+'\
   await stop('SIGKILL');
   process.kill(fixturePid, 'SIGTERM');
   fixturePid = undefined;
+  // Simulate an upgrade with two stale checkpoints and one valid auto checkpoint.
+  const checkpointDb = new DatabaseSync(join(db, 'recordings.sqlite'));
+  try {
+    const update = checkpointDb.prepare(`UPDATE chunk_results SET segment =
+      CASE WHEN chunkIndex = 0 THEN json_remove(segment, '$.requestedLanguage')
+           ELSE json_set(segment, '$.requestedLanguage', 'zh') END
+      WHERE recordingId = ? AND chunkIndex IN (0, 1)`);
+    assert.equal(update.run(id).changes, 2);
+  } finally {
+    checkpointDb.close();
+  }
   await rm(blockAt);
   await start();
   const completed = await state('complete');
   assert.equal(completed.attempts, 3);
   assert.equal(completed.id, id);
-  assert.deepEqual((await calls()).map(call => call.index), [0, 1, 1, 2, 3, 3, 4]);
-  assert.deepEqual(completed.ledger.map(task => [task.owner, task.deadline]), [['小王', '本周五'], ['小李', '下周一']]);
+  assert.deepEqual((await calls()).map(call => call.index), [0, 1, 1, 2, 3, 0, 1, 3, 4]);
+  assert.ok(completed.transcript.every(segment => segment.requestedLanguage === 'auto'));
+  assert.deepEqual(completed.ledger.map(task => [task.owner, task.deadline]), [['Zoty', '本周五'], ['Eric.s', '下周一']]);
   for (const task of completed.ledger) {
     const segment = completed.transcript.find(segment => segment.sourceId === task.sourceId);
     assert.equal(task.startMs, segment.startMs);
@@ -158,17 +171,34 @@ await writeFile(args['--out'], JSON.stringify({...metadata,status:'started'})+'\
   await start();
   assert.deepEqual((await list())[0], completed);
   assert.equal((await upload(wave)).duplicate, true);
-  assert.equal((await calls()).length, 7);
+  assert.equal((await calls()).length, 9);
   console.log('PASS 已完成台账重启后保持原条目 ID，重复导入未派发转写');
+
+  await stop();
+  const legacyTranscript = completed.transcript.map(({ requestedLanguage, ...segment }) => segment);
+  const legacyDb = new DatabaseSync(join(db, 'recordings.sqlite'));
+  try {
+    legacyDb.prepare('UPDATE recordings SET transcript = ? WHERE id = ?').run(JSON.stringify(legacyTranscript), id);
+  } finally {
+    legacyDb.close();
+  }
+  await start();
+  const retained = await upload(wave);
+  assert.equal(retained.duplicate, true);
+  assert.deepEqual(retained.recording, { ...completed, transcript: legacyTranscript });
+  assert.equal((await calls()).length, 9);
+  console.log('PASS 自动语种请求、旧分段重新处理及历史完成台账原样读取');
 
   assert.deepEqual(await readdir(join(root, 'data/asr-work')), []);
   // Check that a superficially successful receipt cannot be rebound to another audio.
-  const fake = JSON.stringify({ status: 'started', attemptId: 'a' }) + '\n' + JSON.stringify({
-    status: 'passed', attemptId: 'a', audioSha256: 'wrong', audioSamples: chunks[0].samples,
+  const fake = JSON.stringify({ status: 'started', attemptId: 'a', language: 'auto' }) + '\n' + JSON.stringify({
+    status: 'passed', attemptId: 'a', language: 'auto', audioSha256: 'wrong', audioSamples: chunks[0].samples,
     source: { complete: true, provider: 'aliyun', model: 'qwen3-asr-flash', adapterVersion: 'qwen-file-lab-v1',
-      asrAttemptId: 'a', items: [{ final: true, text: '由小王负责整理文档。' }] },
+      asrAttemptId: 'a', items: [{ final: true, text: '由Zoty负责整理文档。' }] },
   });
   assert.throws(() => parseReceipt(fake, chunks[0]), /不匹配/);
+  const otherMode = fake.replace('wrong', chunks[0].sha256).replaceAll('"auto"', '"zh"');
+  assert.throws(() => parseReceipt(otherMode, chunks[0]), /不匹配/);
   assert.throws(() => parseReceipt('', chunks[0]));
   console.log('PASS 回执内容、音频哈希及完整性校验');
   console.log('OFFLINE VERIFIED — 使用协议夹具，未调用阿里云，不代表真实语音识别验收。');

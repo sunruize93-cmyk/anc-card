@@ -101,8 +101,8 @@ test('重启恢复收件队列；重发同音频复用录音；原线程结果�
     due(db); await sync();
     assert.match(f.patches[0].data.content, /转写失败/);
     recording.status = 'complete';
-    recording.transcript = [{ startMs: 8560, endMs: 14860, text: '由小王负责整理会议纪要。' }];
-    recording.ledger = [{ id: 'same-task-id', startMs: 8560, endMs: 14860, owner: '小王', title: '整理会议纪要' }];
+    recording.transcript = [{ startMs: 8560, endMs: 14860, text: '由Zoty负责整理会议纪要。' }];
+    recording.ledger = [{ id: 'same-task-id', startMs: 8560, endMs: 14860, owner: 'Zoty', title: '整理会议纪要' }];
     due(db); await sync();
     assert.equal(f.patches[1].path.message_id, 'om_reply_1');
     assert.match(f.patches[1].data.content, /00:08.560–00:14.860/);

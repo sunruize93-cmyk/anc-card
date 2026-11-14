@@ -1,0 +1,6 @@
+# 单独使用本工具目录时：本机环境和联调数据都不提交
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+/.anc-field/

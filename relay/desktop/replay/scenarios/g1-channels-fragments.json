@@ -1,0 +1,64 @@
+{
+  "id": "G1",
+  "group": "通道与分片",
+  "provenance": "0-2、0-4、0-11 的参数和所走通道来自 A 卡 V1.0.0 实测（14 日日志）；分片边界、合并方式、时序全部是合成的，实测日志没有记录原始通知边界。",
+  "host_calls": ["read_status"],
+  "expect": {
+    "status": {"battery_percent": 99, "charging": false, "remaining_kb": 30516928, "total_kb": 30521344, "firmware": "V1.0.0"},
+    "parser_buffers_empty": true
+  },
+  "variants": [
+    {
+      "name": "实测通道：0-4 走 AE23，0-2 和 0-11 走 AE22，每帧一次通知",
+      "on_command": {
+        "0-3": [[{"channel": "ae23", "delay_ms": 5, "frames": [{"type": 0, "cmd": 4, "params_hex": "63", "seq": 0}]}]],
+        "0-1": [[{"channel": "ae22", "delay_ms": 4, "frames": [{"type": 0, "cmd": 2, "params_hex": "c0a6d10100b8d101", "seq": 1}]}]],
+        "0-10": [[{"channel": "ae22", "delay_ms": 6, "frames": [{"type": 0, "cmd": 11, "params_hex": "56312e302e30", "seq": 2}]}]]
+      }
+    },
+    {
+      "name": "每帧拆成多次通知（合成边界）",
+      "on_command": {
+        "0-3": [[{"channel": "ae23", "delay_ms": 5, "split_at": [1, 6], "frames": [{"type": 0, "cmd": 4, "params_hex": "63", "seq": 0}]}]],
+        "0-1": [[{"channel": "ae22", "delay_ms": 4, "split_at": [3, 7, 11], "frames": [{"type": 0, "cmd": 2, "params_hex": "c0a6d10100b8d101", "seq": 1}]}]],
+        "0-10": [[{"channel": "ae22", "delay_ms": 30, "split_at": [5], "frames": [{"type": 0, "cmd": 11, "params_hex": "56312e302e30", "seq": 2}]}]]
+      }
+    },
+    {
+      "name": "一次 AE22 通知里有两帧（0-2 和 0-11 合在一起）",
+      "on_command": {
+        "0-3": [[{"channel": "ae23", "delay_ms": 5, "frames": [{"type": 0, "cmd": 4, "params_hex": "63", "seq": 0}]}]],
+        "0-1": [[]],
+        "0-10": [[{"channel": "ae22", "delay_ms": 6, "frames": [
+          {"type": 0, "cmd": 2, "params_hex": "c0a6d10100b8d101", "seq": 1},
+          {"type": 0, "cmd": 11, "params_hex": "56312e302e30", "seq": 2}]}]]
+      }
+    },
+    {
+      "name": "两帧合在一起再跨帧边界拆开（第一片是 0-2 的前半，第二片是 0-2 的后半加 0-11 的前半）",
+      "on_command": {
+        "0-3": [[{"channel": "ae23", "delay_ms": 5, "frames": [{"type": 0, "cmd": 4, "params_hex": "63", "seq": 0}]}]],
+        "0-1": [[]],
+        "0-10": [[{"channel": "ae22", "delay_ms": 6, "split_at": [9, 20], "frames": [
+          {"type": 0, "cmd": 2, "params_hex": "c0a6d10100b8d101", "seq": 1},
+          {"type": 0, "cmd": 11, "params_hex": "56312e302e30", "seq": 2}]}]]
+      }
+    },
+    {
+      "name": "应答顺序打乱：0-11 先到，0-4 最后到，AE22 和 AE23 的分片交错到达",
+      "on_command": {
+        "0-3": [[{"channel": "ae23", "delay_ms": 25, "split_at": [4], "frames": [{"type": 0, "cmd": 4, "params_hex": "63", "seq": 0}]}]],
+        "0-1": [[{"channel": "ae22", "delay_ms": 20, "split_at": [6], "frames": [{"type": 0, "cmd": 2, "params_hex": "c0a6d10100b8d101", "seq": 1}]}]],
+        "0-10": [[{"channel": "ae22", "delay_ms": 2, "frames": [{"type": 0, "cmd": 11, "params_hex": "56312e302e30", "seq": 2}]}]]
+      }
+    }
+  ],
+  "exhaustive": {
+    "note": "测试代码另外对「0-2 和 0-11 合成一条通知」的每一个切点（1 到 29 字节）各跑一次，对 0-4 帧的每一个切点（1 到 8 字节）各跑一次。",
+    "combined_frames": [
+      {"type": 0, "cmd": 2, "params_hex": "c0a6d10100b8d101", "seq": 1},
+      {"type": 0, "cmd": 11, "params_hex": "56312e302e30", "seq": 2}
+    ],
+    "battery_frame": {"type": 0, "cmd": 4, "params_hex": "63", "seq": 0}
+  }
+}

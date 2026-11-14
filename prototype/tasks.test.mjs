@@ -13,7 +13,7 @@ import { extract } from './recordings.mjs';
 function ingest(tasks) {
   const id = randomUUID();
   tasks.ingest({ id: 'recording-sha', name: 'self-generated.wav', ledger: [{ id, title: '接口示例和调用说明',
-    owner: '小王', deadline: '本周五', evidence: '由小王负责接口示例和调用说明，接口 429 只重试一次。',
+    owner: 'Zoty', deadline: '本周五', evidence: '由Zoty负责接口示例和调用说明，接口 429 只重试一次。',
     startMs: 1000, endMs: 16000, timing: 'audio_chunk', sourceId: 'asr-source', chunkSha256: 'chunk-sha' }] });
   return id;
 }
@@ -93,8 +93,8 @@ test('飞书实际 SDK 分发形状、负责人、群、原卡片、版本及重
 });
 
 test('任务的验收要求与截止时间之间有其他分句时，仍分别保留每位负责人的截止时间', () => {
-  const items = extract([{ startMs: 0, endMs: 20000, text: '由小王负责接口示例，429 只重试一次，截止时间是本周五。由小李负责文档，补充用法，截止时间是下周一。' }]);
-  assert.deepEqual(items.map(item => [item.owner, item.deadline]), [['小王', '本周五'], ['小李', '下周一']]);
+  const items = extract([{ startMs: 0, endMs: 20000, text: '由Zoty负责接口示例，429 只重试一次，截止时间是本周五。由Eric.s负责文档，补充用法，截止时间是下周一。' }]);
+  assert.deepEqual(items.map(item => [item.owner, item.deadline]), [['Zoty', '本周五'], ['Eric.s', '下周一']]);
 });
 
 test('录音台账重载不重复建任务，待确认建议和已接受的执行请求在重启后保留', async () => {
@@ -118,6 +118,8 @@ test('录音台账重载不重复建任务，待确认建议和已接受的执�
     tasks.claim();
     const sessionId = randomUUID();
     tasks.session(id, sessionId);
+    // Simulate the former runner process having exited before reopening the database.
+    tasks.save({ ...tasks.get(id), executionOwnerPid: null });
     db.close();
     db = new DatabaseSync(file);
     tasks = openTasks(db);
@@ -129,4 +131,11 @@ test('录音台账重载不重复建任务，待确认建议和已接受的执�
     assert.equal(tasks.get(id).recovering, true);
     db.close();
   } finally { await rm(directory, { recursive: true, force: true }); }
+});
+
+test('百炼把 Eric.s 写成 Eric S 时，台账保留原话并认出负责人', () => {
+  const evidence = '由 Eric S 负责接口示例和调用说明。';
+  const [item] = extract([{ startMs: 0, endMs: 3200, text: evidence }]);
+  assert.equal(item.owner, 'Eric.s');
+  assert.equal(item.evidence, evidence);
 });

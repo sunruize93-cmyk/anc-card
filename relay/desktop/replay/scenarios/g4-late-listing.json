@@ -1,0 +1,226 @@
+{
+  "id": "G4",
+  "group": "保存后最终可发现性：3-3 先到，新文件晚一到两次列表才出现（真实的 Windows watch 循环，脚本卡注入）",
+  "provenance": "synthetic：全部是合成时序。真卡按保存后多久才把新文件列出来、会不会先发 3-3，都没有实测。",
+  "baseline": [
+    "note20261114-090000."
+  ],
+  "new_file": "note20261114-110000.",
+  "variants": [
+    {
+      "name": "A 保存后第一次列表只有旧文件，之后的轮询才出现新文件：最终只下载一次，内容正确",
+      "watch": {
+        "poll_s": 0.4,
+        "settle_s": 0.05,
+        "reconnect_wait_s": 0.05,
+        "run_s": 3.0
+      },
+      "card": {
+        "files": [
+          {
+            "from_ms": 0,
+            "names": [
+              "note20261114-090000."
+            ]
+          },
+          {
+            "from_ms": 1100,
+            "names": [
+              "note20261114-090000.",
+              "note20261114-110000."
+            ]
+          }
+        ],
+        "unsolicited": [
+          {
+            "at_ms": 300,
+            "channel": "ae23",
+            "frames": [
+              {
+                "type": 3,
+                "cmd": 3,
+                "seq": 0
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "new_file_appears_ms": 1100,
+        "lists_missing_new_after_save_min": 2,
+        "save_button_events": 1,
+        "connects": 1
+      }
+    },
+    {
+      "name": "B 期间重复 3-3，对账时列表不确定，之后恢复：不重复下载，不把不确定当成功，不确定期间基线不变",
+      "watch": {
+        "poll_s": 0.5,
+        "settle_s": 0.1,
+        "reconnect_wait_s": 0.05,
+        "run_s": 3.0,
+        "list_first_timeout_s": 0.15
+      },
+      "card": {
+        "files": [
+          {
+            "from_ms": 0,
+            "names": [
+              "note20261114-090000."
+            ]
+          },
+          {
+            "from_ms": 200,
+            "names": [
+              "note20261114-090000.",
+              "note20261114-110000."
+            ]
+          }
+        ],
+        "unsolicited": [
+          {
+            "at_ms": 300,
+            "channel": "ae23",
+            "frames": [
+              {
+                "type": 3,
+                "cmd": 3,
+                "seq": 0
+              }
+            ]
+          },
+          {
+            "at_ms": 330,
+            "channel": "ae23",
+            "frames": [
+              {
+                "type": 3,
+                "cmd": 3,
+                "seq": 0
+              }
+            ]
+          }
+        ],
+        "on_command": {
+          "2-0": [
+            "default",
+            [
+              {
+                "channel": "ae22",
+                "delay_ms": 5,
+                "frames": [
+                  {
+                    "type": 2,
+                    "cmd": 18,
+                    "params_hex": "00",
+                    "seq": 0
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "channel": "ae22",
+                "delay_ms": 5,
+                "frames": [
+                  {
+                    "type": 2,
+                    "cmd": 18,
+                    "params_hex": "00",
+                    "seq": 0
+                  }
+                ]
+              }
+            ],
+            "default"
+          ]
+        }
+      },
+      "expect": {
+        "new_file_appears_ms": 200,
+        "list_uncertain_min": 1,
+        "save_button_events": 1,
+        "connects": 1,
+        "note": "新文件从 200 ms 起就在卡上，但保存后的那次对账两次都只收到孤立 2-18，报不确定；这期间基线必须保持只有旧文件，之后的轮询才下载"
+      }
+    },
+    {
+      "name": "C 保存事件还没处理就断连，重连后新文件才出现：旧事件不带进新连接，靠重新对账发现，只成功一次",
+      "watch": {
+        "poll_s": 0.3,
+        "settle_s": 0.05,
+        "reconnect_wait_s": 0.2,
+        "run_s": 3.0
+      },
+      "card": {
+        "files": [
+          {
+            "from_ms": 0,
+            "names": [
+              "note20261114-090000."
+            ]
+          },
+          {
+            "from_ms": 1000,
+            "names": [
+              "note20261114-090000.",
+              "note20261114-110000."
+            ]
+          }
+        ],
+        "unsolicited": [
+          {
+            "at_ms": 100,
+            "channel": "ae23",
+            "frames": [
+              {
+                "type": 3,
+                "cmd": 3,
+                "seq": 0
+              }
+            ]
+          }
+        ],
+        "drops_at_ms": [
+          150
+        ],
+        "on_command": {
+          "2-0": [
+            [
+              {
+                "channel": "ae22",
+                "delay_ms": 200,
+                "frames": [
+                  {
+                    "type": 2,
+                    "cmd": 1,
+                    "params_hex": "0000000100000001000003e86e6f746532303236313131342d3039303030302e"
+                  }
+                ]
+              },
+              {
+                "channel": "ae22",
+                "delay_ms": 210,
+                "frames": [
+                  {
+                    "type": 2,
+                    "cmd": 18,
+                    "params_hex": "00"
+                  }
+                ]
+              }
+            ],
+            "default"
+          ]
+        }
+      },
+      "expect": {
+        "new_file_appears_ms": 1000,
+        "save_button_events": 0,
+        "connects": 2,
+        "drops": 1,
+        "note": "第一次列表很慢（200 ms 才回）；3-3 在列表进行中到达，只进了事件队列还没被处理，150 ms 时卡断开。旧连接的事件随连接清掉，新连接从空队列开始；新文件靠重连后的轮询对账发现"
+      }
+    }
+  ]
+}

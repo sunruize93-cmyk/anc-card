@@ -1,11 +1,15 @@
+import {validateAudioDeclaration} from './audio/qs668.mjs';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readPersonalArtifact } from './personal-worker.mjs';
 import { runTasks } from './task-runner.mjs';
 import { openFeishu } from './feishu.mjs';
 import { audioTypes, maxAudioBytes, openRecordings } from './recordings.mjs';
 import { configureSpeakmode, speakmodeStatus } from './speakmode.mjs';
+import { openDocumentCoordinator } from './structured-documents/coordinator.mjs';
+import { cleanupPreflight } from './structured-documents/cleanup-preflight.mjs';
 
 const port = Number(process.env.ANC_PROTOTYPE_PORT || 4785);
 const address = '127.0.0.1';
@@ -16,6 +20,10 @@ const recordings = await openRecordings(dataDirectory);
 const tasks = recordings.tasks;
 const runner = runTasks(tasks, dataDirectory);
 const feishu = await openFeishu(dataDirectory, tasks, recordings);
+const documents = process.env.ANC_RECORDING_DOCUMENTS === '1' ? await openDocumentCoordinator({
+  directory: dataDirectory, recordings, feishu,
+  ids: (process.env.ANC_DOCUMENT_RECORDING_IDS || '').split(',').filter(Boolean),
+}) : null;
 
 function reply(response, status, data) {
   response.writeHead(status, {
@@ -52,6 +60,8 @@ async function importRecording(request, response) {
       !Object.hasOwn(audioTypes, extname(name).toLowerCase())) {
     return reply(response, 400, { error: '请选择 WAV、M4A 或 MP3 文件。' });
   }
+  const audioFormat = request.headers['x-anc-audio-format'];
+  validateAudioDeclaration(name, audioFormat, request.headers['content-type']);
   const declared = Number(request.headers['content-length']);
   if (!Number.isSafeInteger(declared) || declared < 1) {
     return reply(response, 411, { error: '请上传大小已知的非空音频文件。' });
@@ -67,7 +77,7 @@ async function importRecording(request, response) {
   const audio = Buffer.concat(chunks);
   if (audio.length !== declared) return reply(response, 400, { error: '上传未完成。' });
 
-  const result = recordings.import(name, audio);
+  const result = recordings.import(name, audio, { audioFormat });
   if (publish) recordings.delivery.enqueue({ ...binding, recordingId: result.recording.id, device, name });
   return reply(response, result.duplicate ? 200 : 202, result);
 }
@@ -107,18 +117,38 @@ const server = createServer(async (request, response) => {
   if (request.headers.host !== host || (request.headers.origin && request.headers.origin !== `http://${host}`)) {
     return reply(response, 403, { error: '仅允许本机原型页面访问。' });
   }
+  if (request.method === 'GET' && request.url === '/agent') {
+    response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end(await readFile(new URL('./personal-agent.html', import.meta.url)));
+    return;
+  }
   if (request.method === 'GET' && request.url === '/') {
     return response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }).end(page);
   }
   if (request.method === 'GET' && request.url === '/api/state') return reply(response, 200, tasks.get('T-057'));
   if (request.method === 'GET' && request.url === '/api/tasks') return reply(response, 200, tasks.list().filter(task => task.origin === 'recording'));
+  const artifactRoute = /^\/api\/tasks\/([A-Za-z0-9-]{1,80})\/artifacts\/([A-Za-z0-9_.-]{1,100})$/.exec(request.url);
+  if (artifactRoute && request.method === 'GET') {
+    try {
+      const bytes = await readPersonalArtifact(dataDirectory, tasks.get(artifactRoute[1]), artifactRoute[2]);
+      response.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8', 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'no-store' }).end(bytes);
+    } catch (error) { reply(response, error.status || 409, { error: error.message }); }
+    return;
+  }
   const taskRoute = /^\/api\/tasks\/([A-Za-z0-9-]{1,80})$/.exec(request.url);
   if (taskRoute && request.method === 'POST') {
     try {
       const action = await jsonBody(request);
       const id = taskRoute[1];
       let task;
-      if (action.kind === 'prepare') {
+      if (action.kind === 'plan') {
+        const binding = feishu.status();
+        if (binding.configured && (!binding.chatId || !binding.ownerOpenId)) throw new Error('请先保存飞书测试群和负责人。');
+        task = tasks.plan(id, action.version, action.contract, binding.ownerOpenId || 'local', binding.chatId || null, binding.ownerName || '本机负责人');
+      }
+      else if (['withdraw', 'accept'].includes(action.kind)) {
+        task = tasks[action.kind]({ taskId: id, version: action.version, actor: 'local', channel: 'local' });
+      }
+      else if (action.kind === 'prepare') {
         const binding = feishu.status();
         if (binding.configured && (!binding.chatId || !binding.ownerOpenId)) throw new Error('请先保存飞书测试群和负责人。');
         task = tasks.prepare(id, action.version, binding.ownerOpenId || 'local', binding.chatId || null, binding.ownerName || '本机负责人');
@@ -129,6 +159,30 @@ const server = createServer(async (request, response) => {
       } else throw Object.assign(new Error('任务操作无效。'), { status: 400 });
       return reply(response, 202, task);
     } catch (error) { return reply(response, error.status || 400, { error: error.message }); }
+  }
+  if (request.method === 'POST' && request.url === '/api/coffee-drills') {
+    try {
+      const input = await jsonBody(request);
+      const drills = recordings.coffeeDrills;
+      if (input.kind === 'start') {
+        const recording = recordings.get(input.recordingId);
+        if (recording?.status !== 'complete') throw new Error('请选择已完成转写的测试录音。');
+        let chatId = null;
+        let people = { 'Eric.s': 'sim-eric', 'Zoty': 'sim-zoty' };
+        if (input.live === true) {
+          chatId = feishu.status().chatId;
+          const members = await feishu.members(chatId);
+          people = input.people;
+          if (!['Eric.s', 'Zoty'].every(name => members.some(person => person.openId === people?.[name]))) throw new Error('请绑定两位测试群成员。');
+        }
+        return reply(response, 200, drills.start(input.id, recording.id, people, chatId));
+      }
+      if (input.kind === 'step') {
+        const run = drills.get(input.id);
+        return reply(response, 200, drills.step(run.id, input.index, recordings.get(run.recordingId)));
+      }
+      throw new Error('回放操作无效。');
+    } catch (error) { return reply(response, 400, { error: error.message }); }
   }
   if (request.url.startsWith('/api/feishu')) {
     try {
@@ -168,7 +222,7 @@ const server = createServer(async (request, response) => {
         return await importRecording(request, response);
       } catch (error) {
         console.error(error.message);
-        return reply(response, 500, { error: '录音导入失败，请查看启动终端。' });
+        return reply(response, error.status || 500, { error: error.status ? error.message : '录音导入失败，请查看启动终端。' });
       }
     }
   }
@@ -177,9 +231,25 @@ const server = createServer(async (request, response) => {
     const recording = recordings.get(deliveryRoute[1]);
     if (!recording) return reply(response, 404, { error: '录音不存在。' });
     const row = recordings.delivery.get(feishu.status(), recording.id);
-    return reply(response, 200, { recordingId: recording.id, status: recording.status, error: recording.error,
+    let document = null;
+    try { document = documents ? await documents.receipt(null, recording.id) : null; }
+    catch { document = { state: 'failed', errorCode: 'DOCUMENT_READBACK_FAILED', retention: { mode: 'preview', eligible: false } }; }
+    return reply(response, 200, { recordingId: recording.id, status: recording.status, error: recording.error, document, audioFormat: recording.audioFormat, decodeInfo: recording.decodeInfo,
       feishu: row ? { state: row.finished ? 'complete' : row.error ? 'retrying' : row.messageId ? 'updating' : 'pending',
         messageId: row.messageId, error: row.error } : { state: 'not_requested' } });
+  }
+  const cleanupRoute = /^\/api\/recordings\/([a-f0-9]{64})\/cleanup-preflight$/.exec(request.url);
+  if(cleanupRoute && request.method==='GET') {
+    return reply(response,200,await cleanupPreflight({recordings,documents,recordingId:cleanupRoute[1]}));
+  }
+  const documentRoute = /^\/api\/recordings\/([a-f0-9]{64})\/documents\/([1-9][0-9]{0,8})\/(manifest\.json|document\.json|document\.md)$/.exec(request.url);
+  if (documentRoute && request.method === 'GET') {
+    try {
+      const item = documents?.readArtifact(null, documentRoute[1], Number(documentRoute[2]), documentRoute[3]);
+      if (!item) return reply(response, 404, { error: '文档修订不存在' });
+      return response.writeHead(200, { 'Content-Type': item.contentType, 'Content-Length': item.bytes.length,
+        'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }).end(item.bytes);
+    } catch { return reply(response, 503, { error: '文档读回校验失败' }); }
   }
   const recordingRoute = /^\/api\/recordings\/([a-f0-9]{64})\/(audio|retry)$/.exec(request.url);
   if (recordingRoute) {
@@ -201,6 +271,7 @@ server.listen(port, address, () => console.log(`ANC Card 原型  http://${host}`
 async function stop() {
   await new Promise(resolve => server.close(resolve));
   await runner.close();
+  await documents?.close();
   await feishu.close();
   await recordings.close();
   process.exit(0);

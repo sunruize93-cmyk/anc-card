@@ -2,6 +2,9 @@ import { execFile } from 'node:child_process';
 import { lstat, readFile, realpath, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
+import { runCodex, sessionPattern } from './codex-executor.mjs';
+import { executePersonal } from './personal-worker.mjs';
+import { personalProfile } from './execution-contract.mjs';
 import { guideVerification, usageGuide } from './execution-guide.mjs';
 
 const exec = promisify(execFile);
@@ -52,7 +55,7 @@ export const verification = legacyVerification.slice(0, legacyVerification.index
   "await check('guide', async () => {\n" + guideVerification + "});\n" +
   legacyVerification.slice(legacyVerification.indexOf("await check('rate-limit'"));
 
-const sessionPattern = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
+
 
 async function readArtifact(directory, name) {
   const file = join(directory, name);
@@ -61,64 +64,9 @@ async function readArtifact(directory, name) {
   return readFile(file, 'utf8');
 }
 
-async function runCodex(directory, prompt, sessionId, { signal, onSession, onPid }) {
-  const args = [
-    '--sandbox', 'workspace-write', '--ask-for-approval', 'never',
-    '-c', 'web_search="disabled"',
-    '-c', 'sandbox_workspace_write.exclude_tmpdir_env_var=true',
-    '-c', 'sandbox_workspace_write.exclude_slash_tmp=true',
-    '-c', 'model_reasoning_effort="low"',
-    'exec', '--ignore-user-config', '--skip-git-repo-check', '--json',
-  ];
-  if (sessionId) args.push('resume', sessionId);
-  args.push(prompt);
-
-  let stdout;
-  let sessionWriteError;
-  try {
-    const env = Object.fromEntries(['HOME', 'USER', 'PATH', 'TMPDIR', 'CODEX_HOME']
-      .filter(key => process.env[key] !== undefined).map(key => [key, process.env[key]]));
-    const child = exec(process.env.ANC_CODEX_BIN || 'codex', args, {
-      cwd: directory, env, signal, timeout: 180_000, maxBuffer: 2 * 1024 * 1024,
-    });
-    onPid?.(child.child.pid);
-    let buffer = '';
-    child.child.stdout.on('data', data => {
-      buffer += data.toString();
-      const lines = buffer.split('\n');
-      buffer = lines.pop();
-      for (const line of lines) {
-        let event;
-        try { event = JSON.parse(line); } catch { continue; }
-        if (event.type === 'thread.started' && sessionPattern.test(event.thread_id) &&
-            (!sessionId || sessionId === event.thread_id)) {
-          try { onSession?.(event.thread_id); }
-          catch (error) { sessionWriteError = error; child.child.kill('SIGTERM'); }
-        }
-      }
-    });
-    child.child.stdin.end();
-    ({ stdout } = await child);
-  } catch (error) {
-    if (sessionWriteError) throw new Error('保存 Codex 会话失败，本轮执行已停止。');
-    console.error(String(error.stderr || '').slice(-2500));
-    if (error.code === 'ENOENT') throw new Error('找不到 Codex CLI，请检查 PATH 或 ANC_CODEX_BIN。');
-    if (error.killed) throw new Error('Codex 执行超时。');
-    throw new Error('Codex 执行失败，请查看启动终端。');
-  }
-
-  const events = stdout.trim().split('\n').map(line => JSON.parse(line));
-  const id = events.find(event => event.type === 'thread.started')?.thread_id;
-  if (!sessionPattern.test(id ?? '') || (sessionId && id !== sessionId) ||
-      !events.some(event => event.type === 'turn.completed')) {
-    throw new Error('Codex 未返回已完成的目标会话。');
-  }
-  const summary = events.findLast(event =>
-    event.type === 'item.completed' && event.item?.type === 'agent_message')?.item.text;
-  return { sessionId: id, summary: summary?.slice(0, 3000) || '' };
-}
 
 export async function execute(directory, task, options = {}) {
+  if (task.profile === personalProfile) return executePersonal(directory, task, options);
   const previous = task.rounds.at(-1);
   if (options.documentationOnly && !previous) throw new Error('文档修正需要已有执行快照。');
   if (previous && !task.approvedProposal?.action.includes('USAGE.md')) {

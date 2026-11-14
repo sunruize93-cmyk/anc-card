@@ -1,0 +1,219 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+C00000000000000000000000 = {isa = PBXBuildFile; fileRef = B00000000000000000000000; };
+C00000000000000000000001 = {isa = PBXBuildFile; fileRef = B00000000000000000000001; };
+C00000000000000000000002 = {isa = PBXBuildFile; fileRef = B00000000000000000000002; };
+C00000000000000000000003 = {isa = PBXBuildFile; fileRef = B00000000000000000000003; };
+C00000000000000000000004 = {isa = PBXBuildFile; fileRef = B00000000000000000000004; };
+C00000000000000000000005 = {isa = PBXBuildFile; fileRef = B00000000000000000000005; };
+C00000000000000000000006 = {isa = PBXBuildFile; fileRef = B00000000000000000000006; };
+C00000000000000000000007 = {isa = PBXBuildFile; fileRef = B00000000000000000000007; };
+C00000000000000000000008 = {isa = PBXBuildFile; fileRef = B00000000000000000000008; };
+C00000000000000000000009 = {isa = PBXBuildFile; fileRef = B00000000000000000000009; };
+C0000000000000000000000A = {isa = PBXBuildFile; fileRef = B0000000000000000000000A; };
+C0000000000000000000000B = {isa = PBXBuildFile; fileRef = B0000000000000000000000B; };
+C0000000000000000000000C = {isa = PBXBuildFile; fileRef = B0000000000000000000000C; };
+
+B00000000000000000000000 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/ANCRelayApp.swift"; sourceTree = "<group>"; };
+B00000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/BackgroundUploader.swift"; sourceTree = "<group>"; };
+B00000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/CardBluetooth.swift"; sourceTree = "<group>"; };
+B00000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/DeviceConfiguration.swift"; sourceTree = "<group>"; };
+B00000000000000000000004 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/KeychainToken.swift"; sourceTree = "<group>"; };
+B00000000000000000000005 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/RelayModel.swift"; sourceTree = "<group>"; };
+B00000000000000000000006 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/RelayStore.swift"; sourceTree = "<group>"; };
+B00000000000000000000007 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../QS668Kit/Sources/QS668Kit/Protocol.swift"; sourceTree = "<group>"; };
+B00000000000000000000008 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../QS668Kit/Sources/QS668Kit/Transfer.swift"; sourceTree = "<group>"; };
+B00000000000000000000009 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../QS668Kit/Sources/QS668Kit/Upload.swift"; sourceTree = "<group>"; };
+B0000000000000000000000A = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../QS668Kit/Sources/QS668Kit/UploadRecovery.swift"; sourceTree = "<group>"; };
+B0000000000000000000000B = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../QS668Kit/Sources/QS668Kit/V1Upload.swift"; sourceTree = "<group>"; };
+B0000000000000000000000C = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../QS668Kit/Sources/QS668Kit/Validation.swift"; sourceTree = "<group>"; };
+A00000000000000000000007 = {isa = PBXFileReference; explicitFileType = wrapper.application; path = ANCRelay.app; sourceTree = BUILT_PRODUCTS_DIR; };
+
+C0000000000000000000000D = {isa = PBXBuildFile; fileRef = B0000000000000000000000D; };
+B0000000000000000000000D = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../QS668Kit/Sources/QS668Kit/Retention.swift"; sourceTree = "<group>"; };
+
+C0000000000000000000000E = {isa = PBXBuildFile; fileRef = B0000000000000000000000E; };
+B0000000000000000000000E = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../QS668Kit/Sources/QS668Kit/DocumentReceipt.swift"; sourceTree = "<group>"; };
+
+C0000000000000000000000F = {isa = PBXBuildFile; fileRef = B0000000000000000000000F; };
+B0000000000000000000000F = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/CardReadProbe.swift"; sourceTree = "<group>"; };
+C00000000000000000000010 = {isa = PBXBuildFile; fileRef = B00000000000000000000010; };
+B00000000000000000000010 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/MeetingStream.swift"; sourceTree = "<group>"; };
+C00000000000000000000011 = {isa = PBXBuildFile; fileRef = B00000000000000000000011; };
+B00000000000000000000011 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/CardCleanupOperation.swift"; sourceTree = "<group>"; };
+C00000000000000000000012 = {isa = PBXBuildFile; fileRef = B00000000000000000000012; };
+B00000000000000000000012 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../QS668Kit/Sources/QS668Kit/CardDeletion.swift"; sourceTree = "<group>"; };
+C00000000000000000000013 = {isa = PBXBuildFile; fileRef = B00000000000000000000013; };
+B00000000000000000000013 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../QS668Kit/Sources/QS668Kit/CleanupPreflight.swift"; sourceTree = "<group>"; };
+C00000000000000000000014 = {isa = PBXBuildFile; fileRef = B00000000000000000000014; };
+B00000000000000000000014 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "../QS668Kit/Sources/QS668Kit/RawOpus.swift"; sourceTree = "<group>"; };
+D00000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+D00000000000000000000002 = {isa = PBXBuildFile; fileRef = D00000000000000000000001; };
+D00000000000000000000003 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (D00000000000000000000002,); runOnlyForDeploymentPostprocessing = 0; };
+/* Begin PBXGroup section */
+		A00000000000000000000003 = {
+			isa = PBXGroup;
+			children = (
+                D00000000000000000000001,
+				B00000000000000000000000,B00000000000000000000001,B00000000000000000000002,B00000000000000000000003,B00000000000000000000004,B00000000000000000000005,B00000000000000000000006,B00000000000000000000007,B00000000000000000000008,B00000000000000000000009,B0000000000000000000000A,B0000000000000000000000B,B0000000000000000000000C,B00000000000000000000014,B00000000000000000000013,B00000000000000000000012,B00000000000000000000011,B00000000000000000000010,B0000000000000000000000F,B0000000000000000000000E,B0000000000000000000000D,
+				A00000000000000000000004 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A00000000000000000000004 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A00000000000000000000007 /* ANCRelay.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A00000000000000000000005 /* ANCRelay */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A00000000000000000000012 /* Build configuration list for PBXNativeTarget "ANCRelay" */;
+			buildPhases = (
+                D00000000000000000000003,
+				A00000000000000000000008 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ANCRelay;
+			productName = ANCRelay;
+			productReference = A00000000000000000000007 /* ANCRelay.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A00000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 2660;
+			};
+			buildConfigurationList = A00000000000000000000002 /* Build configuration list for PBXProject "ANCRelay" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A00000000000000000000003;
+			productRefGroup = A00000000000000000000004 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A00000000000000000000005 /* ANCRelay */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A00000000000000000000008 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C00000000000000000000000,C00000000000000000000001,C00000000000000000000002,C00000000000000000000003,C00000000000000000000004,C00000000000000000000005,C00000000000000000000006,C00000000000000000000007,C00000000000000000000008,C00000000000000000000009,C0000000000000000000000A,C0000000000000000000000B,C0000000000000000000000C,C00000000000000000000014,C00000000000000000000013,C00000000000000000000012,C00000000000000000000011,C00000000000000000000010,C0000000000000000000000F,C0000000000000000000000E,C0000000000000000000000D,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A00000000000000000000010 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		A00000000000000000000011 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		A00000000000000000000013 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = Info.plist;
+ ALWAYS_SEARCH_USER_PATHS = NO;
+ INFOPLIST_KEY_CFBundleDisplayName = "ANC 上传";
+ INFOPLIST_KEY_NSLocalNetworkUsageDescription = "将您选择的录音发送到同一网络的 ANC 测试后台。";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestlinker.anc.card;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		A00000000000000000000014 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO; INFOPLIST_FILE = Info.plist;
+ ALWAYS_SEARCH_USER_PATHS = NO;
+ INFOPLIST_KEY_CFBundleDisplayName = "ANC 上传";
+ INFOPLIST_KEY_NSLocalNetworkUsageDescription = "将您选择的录音发送到同一网络的 ANC 测试后台。";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nestlinker.anc.card;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A00000000000000000000002 /* Build configuration list for PBXProject "ANCRelay" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A00000000000000000000010 /* Debug */,
+				A00000000000000000000011 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A00000000000000000000012 /* Build configuration list for PBXNativeTarget "ANCRelay" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A00000000000000000000013 /* Debug */,
+				A00000000000000000000014 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A00000000000000000000001 /* Project object */;
+}

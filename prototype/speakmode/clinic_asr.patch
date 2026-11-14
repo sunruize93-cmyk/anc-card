@@ -1,0 +1,96 @@
+--- clinic_asr.rs
++++ clinic_asr.rs
+@@ -2,19 +2,28 @@
+ //! file_asr_lab --wav ABS --config-db ABS --out ABS [--language auto|zh|en]
+ //! The receipt includes test transcription and stays in the explicit local output.
+ #[path="lab_provider_scope/mod.rs"] mod lab_provider_scope;
++#[path="anc_clinic/keychain.rs"] mod clinic_keychain;
+ use base64::{Engine as _,engine::general_purpose::STANDARD};
+ use chrono::Utc;
+ use rusqlite::{Connection,OpenFlags};
+ use serde_json::{Value,json};
+ use sha2::{Digest,Sha256};
+-use speakmode_lib::{cloud::{self,CloudError},core::{ProviderConfig,SourceItem,SourceRevision}};
++use speakmode_lib::{cloud::CloudError,core::{ProviderConfig,SourceItem,SourceRevision}};
+ use std::{fs::{self,OpenOptions},io::{Cursor,Write},path::PathBuf,time::Duration};
++use std::os::unix::fs::OpenOptionsExt;
+ use tokio::time::Instant;
+ use tokio_util::sync::CancellationToken;
+ use uuid::Uuid;
+ 
+ const MODEL:&str="qwen3-asr-flash";
+-const ADAPTER:&str="qwen-file-lab-v1";
++const ADAPTER:&str="anc-clinic-file-v1";
++// One fixed reference glossary for every clip. Terms supply spelling, never a quote, decision, or amount.
++const TERMS:&[&str]=&[
++    "초진진찰료", "재진진찰료", "초진료", "재진료", "재진료비", "상담료", "예약", "진료비", "원", "엔", "위안", "달러",
++    "初诊费", "复诊费", "咨询费", "预约", "诊疗费", "韩元", "日元", "人民币", "美元",
++    "初診料", "再診料", "相談料", "予約", "診療費", "ウォン", "円", "人民元", "ドル",
++    "initial consultation fee", "follow-up fee", "appointment", "consultation fee", "Korean won", "Japanese yen", "Chinese yuan", "US dollar",
++];
+ const MAX_ENCODED_BYTES:usize=10_000_000;
+ fn error(code:&str)->CloudError{CloudError::new(code,"file_asr_experiment","文件识别实验未完成；详见固定结果码")}
+ 
+@@ -34,7 +43,7 @@
+     if actual!=samples{return Err(error("incomplete_audio"));}
+     let mut options=json!({"enable_itn":false});
+     if language!="auto"{options["language"]=json!(language);}
+-    Ok(Audio{body:json!({"model":MODEL,"stream":false,"messages":[{"role":"user","content":[
++    Ok(Audio{body:json!({"model":MODEL,"stream":false,"messages":[{"role":"system","content":TERMS.join(", ")},{"role":"user","content":[
+         {"type":"input_audio","input_audio":{"data":format!("data:audio/wav;base64,{}",STANDARD.encode(bytes))}}
+     ]}],"asr_options":options}),sha256:format!("{:x}",Sha256::digest(bytes)),samples})
+ }
+@@ -73,7 +82,7 @@
+     check()?;result
+ }
+ 
+-async fn run()->Result<(),CloudError>{
++pub(crate) async fn run()->Result<(),CloudError>{
+     let args:Vec<String>=std::env::args().skip(1).collect();
+     if ![6,8].contains(&args.len()){return Err(error("usage"));}
+     let mut pairs=std::collections::HashMap::new();
+@@ -91,14 +100,14 @@
+     let endpoint=lab_provider_scope::file_asr_endpoint(&config)?;
+     let client=reqwest::Client::builder().redirect(reqwest::redirect::Policy::none()).build().map_err(|_|error("network_setup"))?;
+     // Claim an immutable receipt before credential access or any network request.
+-    let mut output=OpenOptions::new().write(true).create_new(true).open(&out).map_err(|_|error("output_unavailable"))?;
++    let mut output=OpenOptions::new().write(true).create_new(true).mode(0o600).open(&out).map_err(|_|error("output_unavailable"))?;
+     let attempt=Uuid::new_v4().to_string();let start=std::time::Instant::now();
+-    let mut row=json!({"scope":"FILE_RECOVERY_SYNTHETIC_PILOT","startedAt":Utc::now().to_rfc3339(),
++    let mut row=json!({"scope":"ANC_CLINIC_FILE_TRANSCRIPTION","startedAt":Utc::now().to_rfc3339(),
+         "appVersion":env!("CARGO_PKG_VERSION"),"model":MODEL,"adapterVersion":ADAPTER,"region":config.region,
+-        "audioSha256":audio.sha256,"audioSamples":audio.samples,"language":language,"dictionaryTerms":[],
++        "audioSha256":audio.sha256,"audioSamples":audio.samples,"language":language,"dictionaryTerms":TERMS,
+         "automaticRetries":0,"automaticInputs":0,"attemptId":attempt,"status":"started"});
+     writeln!(output,"{}",row).map_err(|_|error("output_failed"))?;output.flush().map_err(|_|error("output_failed"))?;
+-    let result=match cloud::credentials::read(&config){Ok(secret)=>request(&client,&endpoint,config.workspace.as_deref(),&secret,&audio.body,&attempt,&CancellationToken::new(),Instant::now()+Duration::from_secs(60)).await,Err(e)=>Err(e)};
++    let result=match clinic_keychain::read(&config){Ok(secret)=>request(&client,&endpoint,config.workspace.as_deref(),&secret,&audio.body,&attempt,&CancellationToken::new(),Instant::now()+Duration::from_secs(60)).await,Err(e)=>Err(e)};
+     row["elapsedMs"]=json!(start.elapsed().as_secs_f64()*1000.0);row["completedAt"]=json!(Utc::now().to_rfc3339());
+     match &result{Ok(source)=>{row["status"]=json!("passed");row["source"]=serde_json::to_value(source).unwrap();},Err(e)=>{row["status"]=json!("failed");row["errorCode"]=json!(e.code);}}
+     writeln!(output,"{}",row).map_err(|_|error("output_failed"))?;output.flush().map_err(|_|error("output_failed"))?;
+@@ -106,7 +115,7 @@
+     result.map(|_|())
+ }
+ #[tokio::main]
+-async fn main(){if let Err(e)=run().await{eprintln!("{}",json!({"errorCode":e.code}));std::process::exit(1);}}
++async fn main(){if clinic_keychain::capabilities_requested("clinic_asr"){return;}if let Err(e)=run().await{eprintln!("{}",json!({"errorCode":e.code}));std::process::exit(1);}}
+ 
+ #[cfg(test)]
+ mod tests{
+@@ -118,6 +127,16 @@
+         assert!(prepare(&wav(1600,16000),"auto").is_ok());assert!(prepare(&wav(0,16000),"auto").is_err());
+         assert!(prepare(&wav(1600,48000),"auto").is_err());assert!(prepare(&vec![0;7_500_000],"auto").is_err());
+         let mut truncated=wav(1600,16000);truncated.truncate(truncated.len()-2);assert!(prepare(&truncated,"auto").is_err());
++    }
++    #[test]fn clinic_context_is_constant_and_auto_has_no_language_hint(){
++        let a=prepare(&wav(1600,16000),"auto").unwrap();
++        let b=prepare(&wav(3200,16000),"auto").unwrap();
++        let ctx=&a.body["messages"][0];
++        assert_eq!(ctx["role"],"system");assert_eq!(ctx["content"],TERMS.join(", "));
++        assert_eq!(b.body["messages"][0],*ctx);
++        assert!(a.body["asr_options"].get("language").is_none());
++        assert_eq!(a.body["messages"].as_array().unwrap().len(),2);
++        assert!(ctx["content"].as_str().unwrap().chars().all(|c|!c.is_ascii_digit()));
+     }
+     #[test]fn only_complete_matching_model_results_become_fresh_source(){
+         let good=json!({"model":MODEL,"choices":[{"finish_reason":"stop","message":{"content":"预算3500元，先不要发送。"}}]});

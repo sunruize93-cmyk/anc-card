@@ -12,3 +12,17 @@ node_modules/
 *.aiff
 *.bin
 *.sqlite*
+
+# Build caches and private phone material
+**/.build/
+**/.swiftpm/
+**/DerivedData/
+**/xcuserdata/
+**/__pycache__/
+*.pyc
+*.xcuserstate
+*.mobileprovision
+*.p12
+*.pem
+*.key
+/verification-independent/reports/

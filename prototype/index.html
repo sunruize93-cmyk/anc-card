@@ -37,8 +37,8 @@ summary{cursor:pointer;color:#2457c8;margin-top:7px}pre{overflow:auto;padding:10
   <header><div class="label">ANC CARD / 最小原型</div><h1>从录音到任务台账</h1><p class="muted">SpeakMode 转写 · 分段回听 · 持久化台账</p></header>
   <section class="card" style="margin-bottom:16px">
     <p id="speakmode-status" role="status">正在检查 SpeakMode…</p>
+    <p id="profile-detail" class="muted small"></p>
     <details id="speakmode-settings"><summary>配置 SpeakMode 的阿里云转写</summary>
-      <p class="muted small">当前文件转写使用 qwen3-asr-flash。录音分段会发送至所选阿里云地域。</p>
       <form id="speakmode-form">
         <label>Key 所属地域 <select name="region"><option value="beijing">北京</option><option value="singapore">新加坡</option></select></label>
         <label>API Key <input type="password" name="key" autocomplete="off" required maxlength="4096"></label>
@@ -69,7 +69,7 @@ summary{cursor:pointer;color:#2457c8;margin-top:7px}pre{overflow:auto;padding:10
   </section>
   <section id="recordings-panel" class="card">
     <h2>导入录音</h2>
-    <p class="muted small">支持普通话 WAV、M4A、MP3，单个文件最多 64 MiB。回听时间范围由音频分段确定。</p>
+    <p class="muted small">支持 WAV、M4A、MP3，单个文件最多 64 MiB。请在获准的范围内导入和回听录音。点击转写旁的时间范围，可从原录音相应位置核对原话。</p>
     <form id="recording-form">
       <input type="file" aria-label="选择录音文件" accept=".wav,.m4a,.mp3" required>
       <button>导入并排队</button>
@@ -92,7 +92,7 @@ summary{cursor:pointer;color:#2457c8;margin-top:7px}pre{overflow:auto;padding:10
 <script type="module">
 const screen = document.querySelector('#screen');
 const notice = document.querySelector('#notice');
-const statuses = {ready:'等候导入',queued:'已入执行队列',running:'执行中',awaiting:'待员工确认',complete:'已核验完成',blocked:'阻塞',interrupted:'执行中断，待恢复'};
+const statuses = {withdrawn:'已撤回',acknowledged:'负责人已接手',ready:'等候导入',queued:'已入执行队列',running:'执行中',awaiting:'待员工确认',complete:'已核验完成',blocked:'阻塞',interrupted:'执行中断，待恢复'};
 let last, sending = false;
 const escape = s => String(s ?? '').replace(/[&<>"']/g, c => ({
   '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
@@ -190,6 +190,12 @@ function timeButton(id, startMs, endMs, timing) {
   return `<button type="button" class="seek" data-audio="${id}" data-ms="${startMs}">${timing === 'audio_chunk' ? '分段回听 ' : ''}${formatTime(startMs)}–${formatTime(endMs)}</button>`;
 }
 
+function speakerLabel(segment) {
+  if (!Number.isSafeInteger(segment.speakerId) || segment.speakerId < 0 ||
+      !Number.isSafeInteger(segment.speakerScope) || segment.speakerScope < 0) return '';
+  return `片段组 ${segment.speakerScope + 1} · 声音 ${segment.speakerId + 1}`;
+}
+
 function renderRecordings(recordings) {
   if (!recordings.length) {
     recordingList.innerHTML = '<p class="muted">等待导入录音。</p>';
@@ -201,15 +207,21 @@ function renderRecordings(recordings) {
       <div class="small">负责人 ${escape(task.owner)}${task.deadline ? ` · 截止 ${escape(task.deadline)}` : ''}</div>
       <div class="small muted">${escape(recording.name)} · 原文「${escape(task.evidence)}」</div></li>`)).join('');
   const queue = recordings.map(recording => {
-    const transcript = (recording.transcript ?? []).map(segment =>
-      `<li>${timeButton(recording.id, segment.startMs, segment.endMs, segment.timing)} ${escape(segment.text)}</li>`).join('');
-    const source = recording.transcript?.some(segment => segment.engine === 'speakmode')
-      ? 'SpeakMode · qwen3-asr-flash · 音频分段范围' : '旧版本机转写';
+    const segments = recording.transcript ?? [];
+    const transcript = segments.map(segment => {
+      const label = speakerLabel(segment);
+      return `<li>${timeButton(recording.id, segment.startMs, segment.endMs, segment.timing)} ${label ? `<strong class="small">${label}</strong> ` : ''}${escape(segment.text)}</li>`;
+    }).join('');
+    const clinic = segments.some(segment => segment.boundaryModel === 'qwen-audio-3.1-asr-flash');
+    const localClinic = segments.some(segment => segment.adapterVersion === 'anc-local-qwen-38-v1');
+    const source = clinic
+      ? 'qwen-audio-3.1-asr-flash 划分话轮 → ' + (localClinic ? '本机 Qwen3-ASR-1.7B' : 'qwen3-asr-flash') + ' 转写原声。声音编号仅在同一片段组内有效。'
+      : segments.some(segment => segment.engine === 'speakmode') ? 'SpeakMode · qwen3-asr-flash · 音频分段范围' : '旧版本机转写';
     return `<li><strong>${escape(recording.name)}</strong> <span class="chip">${recordingStatus[recording.status]}</span>
       <span class="small muted">已尝试 ${recording.attempts} 次</span>
-      ${recording.status === 'complete' ? `<div class="small muted">${source}</div>` : ''}
+      ${recording.status === 'complete' && segments.length ? `<div class="small muted">${source}</div>` : ''}
       ${recording.error ? `<div class="small">${escape(recording.error)}
-        <button class="secondary" type="button" data-retry="${recording.id}">重试</button></div>` : ''}
+        <button class="secondary" type="button" data-retry="${recording.id}">${recording.error.includes('clinic_keychain_access_required') ? '处理钥匙串权限后重试' : '重试'}</button></div>` : ''}
       ${recording.status === 'complete' ? `<details><summary>转写全文 · ${recording.ledger.length} 条行动项</summary>
         ${transcript ? `<ul class="events">${transcript}</ul>` : '<p class="muted">未识别到语音。</p>'}</details>` : ''}
     </li>`;
@@ -379,7 +391,7 @@ async function refreshTasks() {
         ${latest ? `<p>已核验 ${latest.checks.filter(check=>check.passed).length}/${latest.checks.length} · ${task.rounds.length} 轮</p>` : ''}
         ${task.proposal ? `<p><strong>${escape(task.proposal.title)}</strong><br>${escape(task.proposal.action)}</p>` : ''}
         ${action ? `<button data-task="${escape(task.taskId)}" data-kind="${action}" data-version="${task.version}" data-proposal="${escape(task.proposal?.id)}">${buttonText}</button>` : ''}
-        ${task.ownerOpenId && task.ownerOpenId !== 'local' ? '<p class="small">请负责人在飞书任务卡片上确认。</p>' : ''}
+        ${task.chatId && task.ownerOpenId && task.ownerOpenId !== 'local' ? '<p class="small">请负责人在飞书任务卡片上确认。</p>' : ''}
         ${task.card.messageId ? `<p class="small muted">已绑定飞书原卡片 ${escape(task.card.messageId)}</p>` : ''}
         ${task.card.error ? `<p class="small">卡片同步待重试 · ${escape(task.card.error)}</p>` : ''}
         ${task.sessionId ? `<p class="small muted">Codex 会话 ${escape(task.sessionId)}</p>` : ''}
@@ -412,10 +424,19 @@ async function refreshSpeakmode() {
   const response = await fetch('/api/speakmode', {cache:'no-store'});
   if (!response.ok) throw new Error('无法检查 SpeakMode 配置。');
   const status = await response.json();
-  document.querySelector('#speakmode-status').textContent = !status.installed
+  const localClinic = status.profile === 'clinic-local';
+  const clinic = status.profile === 'clinic' || localClinic;
+  document.querySelector('#profile-detail').textContent = clinic
+    ? (localClinic ? '音频会发送到所选阿里云地域划分话轮。随后由这台 Mac 上的 Qwen3-ASR-1.7B 结合门诊词表转写各段原声。'
+      : '诊所模式先用 qwen-audio-3.1-asr-flash 划分话轮，再用 qwen3-asr-flash 转写各段原声。两步均向所选阿里云地域发送音频，并分别产生模型用量。')
+    : '基础模式按停顿分段，使用 qwen3-asr-flash 自动识别语种并转写。音频分段会发送至所选阿里云地域。';
+  const readiness = !status.installed
     ? 'SpeakMode 转写工具尚待安装。请运行 sh prototype/scripts/setup-speakmode.sh。'
+    : clinic && !status.turnsInstalled ? '门诊工具尚未安装，或版本不支持无弹窗访问。请运行 sh prototype/scripts/setup-speakmode.sh --clinic-only 后刷新页面。'
+    : localClinic && !status.localAsrReady ? '本机转写器尚未就绪。请运行 sh prototype/scripts/setup-clinic-local.sh 后刷新页面。'
     : !status.configured ? 'SpeakMode 转写工具已就绪，请配置阿里云 API Key。'
       : '已发现 SpeakMode 配置，导入录音后可校验转写连接。';
+  document.querySelector('#speakmode-status').textContent = (clinic ? '诊所模式 · ' : '基础模式 · ') + readiness;
   if (status.installed && !status.configured) document.querySelector('#speakmode-settings').open = true;
 }
 

@@ -1,0 +1,135 @@
+{
+  "events": [
+    {
+      "kind": "audio",
+      "recordingId": "6f75e0ddd227eae259f32e4777b492d6659b6ac79ca0f3dbe3bf8adb5bc6e579",
+      "sha256": "6f75e0ddd227eae259f32e4777b492d6659b6ac79ca0f3dbe3bf8adb5bc6e579",
+      "bytes": 32044,
+      "durationMs": 1000,
+      "eventId": "event-01",
+      "seq": 1,
+      "provenance": "simulated"
+    },
+    {
+      "kind": "upload",
+      "recordingId": "6f75e0ddd227eae259f32e4777b492d6659b6ac79ca0f3dbe3bf8adb5bc6e579",
+      "localId": "synthetic-local-1",
+      "sha256": "6f75e0ddd227eae259f32e4777b492d6659b6ac79ca0f3dbe3bf8adb5bc6e579",
+      "bytes": 32044,
+      "duplicate": false,
+      "eventId": "event-02",
+      "seq": 2,
+      "provenance": "simulated"
+    },
+    {
+      "kind": "transcript",
+      "recordingId": "6f75e0ddd227eae259f32e4777b492d6659b6ac79ca0f3dbe3bf8adb5bc6e579",
+      "segments": [
+        {
+          "segmentId": "s1",
+          "startMs": 0,
+          "endMs": 1000,
+          "text": "由 Eric.s 负责写接口说明。"
+        }
+      ],
+      "eventId": "event-03",
+      "seq": 3,
+      "provenance": "simulated"
+    },
+    {
+      "kind": "task",
+      "taskId": "task-1",
+      "recordingId": "6f75e0ddd227eae259f32e4777b492d6659b6ac79ca0f3dbe3bf8adb5bc6e579",
+      "semanticKey": "interface-doc",
+      "version": 3,
+      "owner": "person-eric",
+      "proposalId": "proposal-1",
+      "contractDigest": "834100f622cba7b0e44b23d1c9f737925f458c2b0b7095a13213880dac63a241",
+      "evidence": [
+        {
+          "segmentId": "s1",
+          "startMs": 0,
+          "endMs": 1000,
+          "quote": "由 Eric.s 负责写接口说明。"
+        }
+      ],
+      "eventId": "event-04",
+      "seq": 4,
+      "provenance": "simulated"
+    },
+    {
+      "kind": "card",
+      "recordingId": "6f75e0ddd227eae259f32e4777b492d6659b6ac79ca0f3dbe3bf8adb5bc6e579",
+      "taskId": "task-1",
+      "messageId": "task-card-1",
+      "operation": "create",
+      "cardKind": "task",
+      "eventId": "event-05",
+      "seq": 5,
+      "provenance": "simulated"
+    },
+    {
+      "kind": "authorization",
+      "taskId": "task-1",
+      "authorizationId": "auth-1",
+      "owner": "person-eric",
+      "version": 3,
+      "proposalId": "proposal-1",
+      "contractDigest": "834100f622cba7b0e44b23d1c9f737925f458c2b0b7095a13213880dac63a241",
+      "channel": "feishu",
+      "messageId": "task-card-1",
+      "decision": "execute",
+      "eventId": "event-06",
+      "seq": 6,
+      "provenance": "simulated"
+    },
+    {
+      "kind": "execution_start",
+      "taskId": "task-1",
+      "runId": "run-1",
+      "authorizationId": "auth-1",
+      "approvedVersion": 3,
+      "proposalId": "proposal-1",
+      "contractDigest": "834100f622cba7b0e44b23d1c9f737925f458c2b0b7095a13213880dac63a241",
+      "sessionId": "session-1",
+      "mode": "start",
+      "eventId": "event-07",
+      "seq": 7,
+      "provenance": "simulated"
+    },
+    {
+      "kind": "task_state",
+      "taskId": "task-1",
+      "version": 6,
+      "state": "withdrawn",
+      "eventId": "event-08",
+      "seq": 8,
+      "provenance": "simulated"
+    },
+    {
+      "kind": "execution_result",
+      "taskId": "task-1",
+      "runId": "run-1",
+      "authorizationId": "auth-1",
+      "approvedVersion": 3,
+      "contractDigest": "834100f622cba7b0e44b23d1c9f737925f458c2b0b7095a13213880dac63a241",
+      "sessionId": "session-1",
+      "disposition": "accepted",
+      "eventId": "event-09",
+      "seq": 9,
+      "provenance": "simulated"
+    },
+    {
+      "kind": "card",
+      "recordingId": "6f75e0ddd227eae259f32e4777b492d6659b6ac79ca0f3dbe3bf8adb5bc6e579",
+      "taskId": "task-1",
+      "messageId": "task-card-1",
+      "operation": "update",
+      "cardKind": "task",
+      "runId": "run-1",
+      "eventId": "event-10",
+      "seq": 10,
+      "provenance": "simulated"
+    }
+  ]
+}

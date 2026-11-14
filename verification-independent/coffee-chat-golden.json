@@ -1,0 +1,1053 @@
+{
+  "schemaVersion": 1,
+  "notice": "全部为合成测试样本。时间点仅为连续脚本时间轴，未对应真实录音；semanticRevision不是数据库version。",
+  "cases": [
+    {
+      "caseId": "CC-01",
+      "title": "明确承诺",
+      "provenance": "simulated",
+      "timing": "synthetic_timeline_not_recorded_audio",
+      "audioExists": false,
+      "durationMs": 6910,
+      "segments": [
+        {
+          "segmentId": "CC-01-s1",
+          "startMs": 0,
+          "endMs": 3910,
+          "speaker": "Eric.s",
+          "text": "我来写接口调用说明，只放内部草稿。"
+        },
+        {
+          "segmentId": "CC-01-s2",
+          "startMs": 3910,
+          "endMs": 6910,
+          "speaker": "Zoty",
+          "text": "好，范围就这些。"
+        }
+      ],
+      "expected": {
+        "candidateRevisions": [
+          {
+            "semanticRevision": 1,
+            "taskKey": "CC-01-a",
+            "afterSegment": "CC-01-s1",
+            "state": "candidate",
+            "owner": "Eric.s",
+            "title": "写接口调用说明",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-01-s1",
+                "startMs": 0,
+                "endMs": 3910,
+                "quote": "我来写接口调用说明，只放内部草稿。"
+              }
+            ]
+          }
+        ],
+        "finalTaskCount": 1,
+        "executionAllowedFromTranscript": false,
+        "authorization": "负责人身份映射、当前提案、明确执行范围及当前版本的飞书确认齐备前不执行。仅接手任务不算执行授权。",
+        "rationale": "说话承诺可成为候选，不等于授权 Codex。"
+      }
+    },
+    {
+      "caseId": "CC-02",
+      "title": "提议未接受",
+      "provenance": "simulated",
+      "timing": "synthetic_timeline_not_recorded_audio",
+      "audioExists": false,
+      "durationMs": 7140,
+      "segments": [
+        {
+          "segmentId": "CC-02-s1",
+          "startMs": 0,
+          "endMs": 4140,
+          "speaker": "Eric.s",
+          "text": "要不由 Zoty 负责整理渠道案例？"
+        },
+        {
+          "segmentId": "CC-02-s2",
+          "startMs": 4140,
+          "endMs": 7140,
+          "speaker": "Zoty",
+          "text": "我还没决定，先别分给我。"
+        }
+      ],
+      "expected": {
+        "candidateRevisions": [
+          {
+            "semanticRevision": 1,
+            "taskKey": "CC-02-a",
+            "afterSegment": "CC-02-s1",
+            "state": "proposed",
+            "owner": "Zoty",
+            "title": "整理渠道案例",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-02-s1",
+                "startMs": 0,
+                "endMs": 4140,
+                "quote": "要不由 Zoty 负责整理渠道案例？"
+              }
+            ]
+          },
+          {
+            "semanticRevision": 2,
+            "taskKey": "CC-02-a",
+            "afterSegment": "CC-02-s2",
+            "state": "not_accepted",
+            "owner": null,
+            "title": "整理渠道案例",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-02-s1",
+                "startMs": 0,
+                "endMs": 4140,
+                "quote": "要不由 Zoty 负责整理渠道案例？"
+              },
+              {
+                "segmentId": "CC-02-s2",
+                "startMs": 4140,
+                "endMs": 7140,
+                "quote": "我还没决定，先别分给我。"
+              }
+            ]
+          }
+        ],
+        "finalTaskCount": 1,
+        "executionAllowedFromTranscript": false,
+        "authorization": "负责人身份映射、当前提案、明确执行范围及当前版本的飞书确认齐备前不执行。仅接手任务不算执行授权。",
+        "rationale": "保留提议记录，不能当作已承诺任务。"
+      }
+    },
+    {
+      "caseId": "CC-03",
+      "title": "纯讨论",
+      "provenance": "simulated",
+      "timing": "synthetic_timeline_not_recorded_audio",
+      "audioExists": false,
+      "durationMs": 6680,
+      "segments": [
+        {
+          "segmentId": "CC-03-s1",
+          "startMs": 0,
+          "endMs": 3680,
+          "speaker": "Eric.s",
+          "text": "我觉得韩国市场的渠道结构挺复杂。"
+        },
+        {
+          "segmentId": "CC-03-s2",
+          "startMs": 3680,
+          "endMs": 6680,
+          "speaker": "Zoty",
+          "text": "是的，线上线下差异很大。"
+        }
+      ],
+      "expected": {
+        "candidateRevisions": [],
+        "finalTaskCount": 0,
+        "executionAllowedFromTranscript": false,
+        "authorization": "负责人身份映射、当前提案、明确执行范围及当前版本的飞书确认齐备前不执行。仅接手任务不算执行授权。",
+        "rationale": "没有可提取任务。"
+      }
+    },
+    {
+      "caseId": "CC-04",
+      "title": "负责人不明",
+      "provenance": "simulated",
+      "timing": "synthetic_timeline_not_recorded_audio",
+      "audioExists": false,
+      "durationMs": 6450,
+      "segments": [
+        {
+          "segmentId": "CC-04-s1",
+          "startMs": 0,
+          "endMs": 3000,
+          "speaker": "Zoty",
+          "text": "会后需要整理一页会议摘要。"
+        },
+        {
+          "segmentId": "CC-04-s2",
+          "startMs": 3000,
+          "endMs": 6450,
+          "speaker": "Eric.s",
+          "text": "先把这件事记下来，负责人待定。"
+        }
+      ],
+      "expected": {
+        "candidateRevisions": [
+          {
+            "semanticRevision": 1,
+            "taskKey": "CC-04-a",
+            "afterSegment": "CC-04-s2",
+            "state": "needs_owner",
+            "owner": null,
+            "title": "整理一页会议摘要",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-04-s1",
+                "startMs": 0,
+                "endMs": 3000,
+                "quote": "会后需要整理一页会议摘要。"
+              },
+              {
+                "segmentId": "CC-04-s2",
+                "startMs": 3000,
+                "endMs": 6450,
+                "quote": "先把这件事记下来，负责人待定。"
+              }
+            ]
+          }
+        ],
+        "finalTaskCount": 1,
+        "executionAllowedFromTranscript": false,
+        "authorization": "负责人身份映射、当前提案、明确执行范围及当前版本的飞书确认齐备前不执行。仅接手任务不算执行授权。",
+        "rationale": "不可按发言者或录音持有人猜负责人。"
+      }
+    },
+    {
+      "caseId": "CC-05",
+      "title": "相对期限无锚点",
+      "provenance": "simulated",
+      "timing": "synthetic_timeline_not_recorded_audio",
+      "audioExists": false,
+      "durationMs": 9890,
+      "segments": [
+        {
+          "segmentId": "CC-05-s1",
+          "startMs": 0,
+          "endMs": 5750,
+          "speaker": "Eric.s",
+          "text": "由 Eric.s 负责接口示例，截止时间是本周五。"
+        },
+        {
+          "segmentId": "CC-05-s2",
+          "startMs": 5750,
+          "endMs": 9890,
+          "speaker": "Zoty",
+          "text": "保留这句话，我们还没有确认会议日期。"
+        }
+      ],
+      "expected": {
+        "candidateRevisions": [
+          {
+            "semanticRevision": 1,
+            "taskKey": "CC-05-a",
+            "afterSegment": "CC-05-s1",
+            "state": "needs_date_anchor",
+            "owner": "Eric.s",
+            "title": "接口示例",
+            "deadline": {
+              "raw": "本周五",
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-05-s1",
+                "startMs": 0,
+                "endMs": 5750,
+                "quote": "由 Eric.s 负责接口示例，截止时间是本周五。"
+              }
+            ]
+          }
+        ],
+        "finalTaskCount": 1,
+        "executionAllowedFromTranscript": false,
+        "authorization": "负责人身份映射、当前提案、明确执行范围及当前版本的飞书确认齐备前不执行。仅接手任务不算执行授权。",
+        "rationale": "不根据文件名、设备时间或运行日期补日期。"
+      }
+    },
+    {
+      "caseId": "CC-06",
+      "title": "改口换负责人",
+      "provenance": "simulated",
+      "timing": "synthetic_timeline_not_recorded_audio",
+      "audioExists": false,
+      "durationMs": 9670,
+      "segments": [
+        {
+          "segmentId": "CC-06-s1",
+          "startMs": 0,
+          "endMs": 3220,
+          "speaker": "Eric.s",
+          "text": "我来写两页韩国市场介绍草稿。"
+        },
+        {
+          "segmentId": "CC-06-s2",
+          "startMs": 3220,
+          "endMs": 6670,
+          "speaker": "Eric.s",
+          "text": "改由 Zoty 接手这份草稿。"
+        },
+        {
+          "segmentId": "CC-06-s3",
+          "startMs": 6670,
+          "endMs": 9670,
+          "speaker": "Zoty",
+          "text": "我接手，先做内部版本。"
+        }
+      ],
+      "expected": {
+        "candidateRevisions": [
+          {
+            "semanticRevision": 1,
+            "taskKey": "CC-06-a",
+            "afterSegment": "CC-06-s1",
+            "state": "candidate",
+            "owner": "Eric.s",
+            "title": "两页韩国市场介绍草稿",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-06-s1",
+                "startMs": 0,
+                "endMs": 3220,
+                "quote": "我来写两页韩国市场介绍草稿。"
+              }
+            ]
+          },
+          {
+            "semanticRevision": 2,
+            "taskKey": "CC-06-a",
+            "afterSegment": "CC-06-s2",
+            "state": "proposed",
+            "owner": "Zoty",
+            "title": "两页韩国市场介绍草稿",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-06-s1",
+                "startMs": 0,
+                "endMs": 3220,
+                "quote": "我来写两页韩国市场介绍草稿。"
+              },
+              {
+                "segmentId": "CC-06-s2",
+                "startMs": 3220,
+                "endMs": 6670,
+                "quote": "改由 Zoty 接手这份草稿。"
+              }
+            ]
+          },
+          {
+            "semanticRevision": 3,
+            "taskKey": "CC-06-a",
+            "afterSegment": "CC-06-s3",
+            "state": "candidate",
+            "owner": "Zoty",
+            "title": "两页韩国市场介绍草稿",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-06-s1",
+                "startMs": 0,
+                "endMs": 3220,
+                "quote": "我来写两页韩国市场介绍草稿。"
+              },
+              {
+                "segmentId": "CC-06-s2",
+                "startMs": 3220,
+                "endMs": 6670,
+                "quote": "改由 Zoty 接手这份草稿。"
+              },
+              {
+                "segmentId": "CC-06-s3",
+                "startMs": 6670,
+                "endMs": 9670,
+                "quote": "我接手，先做内部版本。"
+              }
+            ]
+          }
+        ],
+        "finalTaskCount": 1,
+        "executionAllowedFromTranscript": false,
+        "authorization": "负责人身份映射、当前提案、明确执行范围及当前版本的飞书确认齐备前不执行。仅接手任务不算执行授权。",
+        "rationale": "同一 taskKey，旧负责人授权失效，新负责人重新授权。"
+      }
+    },
+    {
+      "caseId": "CC-07",
+      "title": "明确撤回",
+      "provenance": "simulated",
+      "timing": "synthetic_timeline_not_recorded_audio",
+      "audioExists": false,
+      "durationMs": 7590,
+      "segments": [
+        {
+          "segmentId": "CC-07-s1",
+          "startMs": 0,
+          "endMs": 4140,
+          "speaker": "Eric.s",
+          "text": "由 Eric.s 负责写报名页文案。"
+        },
+        {
+          "segmentId": "CC-07-s2",
+          "startMs": 4140,
+          "endMs": 7590,
+          "speaker": "Eric.s",
+          "text": "刚才的报名页文案撤回，别再做。"
+        }
+      ],
+      "expected": {
+        "candidateRevisions": [
+          {
+            "semanticRevision": 1,
+            "taskKey": "CC-07-a",
+            "afterSegment": "CC-07-s1",
+            "state": "candidate",
+            "owner": "Eric.s",
+            "title": "写报名页文案",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-07-s1",
+                "startMs": 0,
+                "endMs": 4140,
+                "quote": "由 Eric.s 负责写报名页文案。"
+              }
+            ]
+          },
+          {
+            "semanticRevision": 2,
+            "taskKey": "CC-07-a",
+            "afterSegment": "CC-07-s2",
+            "state": "withdrawn",
+            "owner": "Eric.s",
+            "title": "写报名页文案",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-07-s1",
+                "startMs": 0,
+                "endMs": 4140,
+                "quote": "由 Eric.s 负责写报名页文案。"
+              },
+              {
+                "segmentId": "CC-07-s2",
+                "startMs": 4140,
+                "endMs": 7590,
+                "quote": "刚才的报名页文案撤回，别再做。"
+              }
+            ]
+          }
+        ],
+        "finalTaskCount": 1,
+        "executionAllowedFromTranscript": false,
+        "authorization": "负责人身份映射、当前提案、明确执行范围及当前版本的飞书确认齐备前不执行。仅接手任务不算执行授权。",
+        "rationale": "已启动则取消；晚到结果拒绝应用，保留审计。"
+      }
+    },
+    {
+      "caseId": "CC-08",
+      "title": "同任务重复提及",
+      "provenance": "simulated",
+      "timing": "synthetic_timeline_not_recorded_audio",
+      "audioExists": false,
+      "durationMs": 11050,
+      "segments": [
+        {
+          "segmentId": "CC-08-s1",
+          "startMs": 0,
+          "endMs": 4140,
+          "speaker": "Zoty",
+          "text": "由 Eric.s 负责接口调用说明。"
+        },
+        {
+          "segmentId": "CC-08-s2",
+          "startMs": 4140,
+          "endMs": 7140,
+          "speaker": "Eric.s",
+          "text": "对，接口调用说明我来写。"
+        },
+        {
+          "segmentId": "CC-08-s3",
+          "startMs": 7140,
+          "endMs": 11050,
+          "speaker": "Zoty",
+          "text": "再提醒一下，就是那份接口调用说明。"
+        }
+      ],
+      "expected": {
+        "candidateRevisions": [
+          {
+            "semanticRevision": 1,
+            "taskKey": "CC-08-a",
+            "afterSegment": "CC-08-s1",
+            "state": "proposed",
+            "owner": "Eric.s",
+            "title": "接口调用说明",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-08-s1",
+                "startMs": 0,
+                "endMs": 4140,
+                "quote": "由 Eric.s 负责接口调用说明。"
+              }
+            ]
+          },
+          {
+            "semanticRevision": 2,
+            "taskKey": "CC-08-a",
+            "afterSegment": "CC-08-s2",
+            "state": "candidate",
+            "owner": "Eric.s",
+            "title": "接口调用说明",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-08-s1",
+                "startMs": 0,
+                "endMs": 4140,
+                "quote": "由 Eric.s 负责接口调用说明。"
+              },
+              {
+                "segmentId": "CC-08-s2",
+                "startMs": 4140,
+                "endMs": 7140,
+                "quote": "对，接口调用说明我来写。"
+              }
+            ]
+          },
+          {
+            "semanticRevision": 3,
+            "taskKey": "CC-08-a",
+            "afterSegment": "CC-08-s3",
+            "state": "candidate",
+            "owner": "Eric.s",
+            "title": "接口调用说明",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-08-s1",
+                "startMs": 0,
+                "endMs": 4140,
+                "quote": "由 Eric.s 负责接口调用说明。"
+              },
+              {
+                "segmentId": "CC-08-s2",
+                "startMs": 4140,
+                "endMs": 7140,
+                "quote": "对，接口调用说明我来写。"
+              },
+              {
+                "segmentId": "CC-08-s3",
+                "startMs": 7140,
+                "endMs": 11050,
+                "quote": "再提醒一下，就是那份接口调用说明。"
+              }
+            ]
+          }
+        ],
+        "finalTaskCount": 1,
+        "executionAllowedFromTranscript": false,
+        "authorization": "负责人身份映射、当前提案、明确执行范围及当前版本的飞书确认齐备前不执行。仅接手任务不算执行授权。",
+        "rationale": "重复提及只追加证据，不能创建三条任务或三次执行。"
+      }
+    },
+    {
+      "caseId": "CC-09",
+      "title": "跨段补充",
+      "provenance": "simulated",
+      "timing": "synthetic_timeline_not_recorded_audio",
+      "audioExists": false,
+      "durationMs": 13110,
+      "segments": [
+        {
+          "segmentId": "CC-09-s1",
+          "startMs": 0,
+          "endMs": 4830,
+          "speaker": "Eric.s",
+          "text": "由 Eric.s 负责接口示例和调用说明。"
+        },
+        {
+          "segmentId": "CC-09-s2",
+          "startMs": 4830,
+          "endMs": 8280,
+          "speaker": "Zoty",
+          "text": "休息一下，下面说一下验收要求。"
+        },
+        {
+          "segmentId": "CC-09-s3",
+          "startMs": 8280,
+          "endMs": 13110,
+          "speaker": "Eric.s",
+          "text": "补充刚才的接口任务，遇到四二九只重试一次。"
+        }
+      ],
+      "expected": {
+        "candidateRevisions": [
+          {
+            "semanticRevision": 1,
+            "taskKey": "CC-09-a",
+            "afterSegment": "CC-09-s1",
+            "state": "candidate",
+            "owner": "Eric.s",
+            "title": "接口示例和调用说明",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-09-s1",
+                "startMs": 0,
+                "endMs": 4830,
+                "quote": "由 Eric.s 负责接口示例和调用说明。"
+              }
+            ]
+          },
+          {
+            "semanticRevision": 2,
+            "taskKey": "CC-09-a",
+            "afterSegment": "CC-09-s3",
+            "state": "candidate",
+            "owner": "Eric.s",
+            "title": "接口示例和调用说明；429只重试一次",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-09-s1",
+                "startMs": 0,
+                "endMs": 4830,
+                "quote": "由 Eric.s 负责接口示例和调用说明。"
+              },
+              {
+                "segmentId": "CC-09-s3",
+                "startMs": 8280,
+                "endMs": 13110,
+                "quote": "补充刚才的接口任务，遇到四二九只重试一次。"
+              }
+            ]
+          }
+        ],
+        "finalTaskCount": 1,
+        "executionAllowedFromTranscript": false,
+        "authorization": "负责人身份映射、当前提案、明确执行范围及当前版本的飞书确认齐备前不执行。仅接手任务不算执行授权。",
+        "rationale": "补充同一 taskKey；修改执行范围后旧授权失效。"
+      }
+    },
+    {
+      "caseId": "CC-10",
+      "title": "暂停后恢复",
+      "provenance": "simulated",
+      "timing": "synthetic_timeline_not_recorded_audio",
+      "audioExists": false,
+      "durationMs": 11510,
+      "segments": [
+        {
+          "segmentId": "CC-10-s1",
+          "startMs": 0,
+          "endMs": 4140,
+          "speaker": "Eric.s",
+          "text": "由 Eric.s 负责渠道案例草稿。"
+        },
+        {
+          "segmentId": "CC-10-s2",
+          "startMs": 4140,
+          "endMs": 7140,
+          "speaker": "Eric.s",
+          "text": "这个任务先暂停，等我确认。"
+        },
+        {
+          "segmentId": "CC-10-s3",
+          "startMs": 7140,
+          "endMs": 11510,
+          "speaker": "Eric.s",
+          "text": "恢复刚才的渠道案例草稿，范围保持不变。"
+        }
+      ],
+      "expected": {
+        "candidateRevisions": [
+          {
+            "semanticRevision": 1,
+            "taskKey": "CC-10-a",
+            "afterSegment": "CC-10-s1",
+            "state": "candidate",
+            "owner": "Eric.s",
+            "title": "渠道案例草稿",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-10-s1",
+                "startMs": 0,
+                "endMs": 4140,
+                "quote": "由 Eric.s 负责渠道案例草稿。"
+              }
+            ]
+          },
+          {
+            "semanticRevision": 2,
+            "taskKey": "CC-10-a",
+            "afterSegment": "CC-10-s2",
+            "state": "paused",
+            "owner": "Eric.s",
+            "title": "渠道案例草稿",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-10-s1",
+                "startMs": 0,
+                "endMs": 4140,
+                "quote": "由 Eric.s 负责渠道案例草稿。"
+              },
+              {
+                "segmentId": "CC-10-s2",
+                "startMs": 4140,
+                "endMs": 7140,
+                "quote": "这个任务先暂停，等我确认。"
+              }
+            ]
+          },
+          {
+            "semanticRevision": 3,
+            "taskKey": "CC-10-a",
+            "afterSegment": "CC-10-s3",
+            "state": "candidate",
+            "owner": "Eric.s",
+            "title": "渠道案例草稿",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-10-s1",
+                "startMs": 0,
+                "endMs": 4140,
+                "quote": "由 Eric.s 负责渠道案例草稿。"
+              },
+              {
+                "segmentId": "CC-10-s2",
+                "startMs": 4140,
+                "endMs": 7140,
+                "quote": "这个任务先暂停，等我确认。"
+              },
+              {
+                "segmentId": "CC-10-s3",
+                "startMs": 7140,
+                "endMs": 11510,
+                "quote": "恢复刚才的渠道案例草稿，范围保持不变。"
+              }
+            ]
+          }
+        ],
+        "finalTaskCount": 1,
+        "executionAllowedFromTranscript": false,
+        "authorization": "负责人身份映射、当前提案、明确执行范围及当前版本的飞书确认齐备前不执行。仅接手任务不算执行授权。",
+        "rationale": "录音中的恢复仅是候选状态变更；飞书明确批准恢复后同会话续跑。"
+      }
+    },
+    {
+      "caseId": "CC-11",
+      "title": "带锚点的明确期限",
+      "provenance": "simulated",
+      "timing": "synthetic_timeline_not_recorded_audio",
+      "audioExists": false,
+      "durationMs": 12420,
+      "segments": [
+        {
+          "segmentId": "CC-11-s1",
+          "startMs": 0,
+          "endMs": 5980,
+          "speaker": "Zoty",
+          "text": "这场测试会议日期是二零二六年十一月十四日，韩国时间。"
+        },
+        {
+          "segmentId": "CC-11-s2",
+          "startMs": 5980,
+          "endMs": 12420,
+          "speaker": "Eric.s",
+          "text": "由 Eric.s 负责内部摘要，截止时间是明天上午十点。"
+        }
+      ],
+      "expected": {
+        "candidateRevisions": [
+          {
+            "semanticRevision": 1,
+            "taskKey": "CC-11-a",
+            "afterSegment": "CC-11-s2",
+            "state": "candidate",
+            "owner": "Eric.s",
+            "title": "内部摘要",
+            "deadline": {
+              "raw": "明天上午十点",
+              "resolved": "2026-11-15T10:00:00+09:00",
+              "anchorSegment": "CC-11-s1"
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-11-s1",
+                "startMs": 0,
+                "endMs": 5980,
+                "quote": "这场测试会议日期是二零二六年十一月十四日，韩国时间。"
+              },
+              {
+                "segmentId": "CC-11-s2",
+                "startMs": 5980,
+                "endMs": 12420,
+                "quote": "由 Eric.s 负责内部摘要，截止时间是明天上午十点。"
+              }
+            ]
+          }
+        ],
+        "finalTaskCount": 1,
+        "executionAllowedFromTranscript": false,
+        "authorization": "负责人身份映射、当前提案、明确执行范围及当前版本的飞书确认齐备前不执行。仅接手任务不算执行授权。",
+        "rationale": "可解析为2026-11-15T10:00:00+09:00，保留原话及锚点。"
+      }
+    },
+    {
+      "caseId": "CC-12",
+      "title": "两个独立任务",
+      "provenance": "simulated",
+      "timing": "synthetic_timeline_not_recorded_audio",
+      "audioExists": false,
+      "durationMs": 6900,
+      "segments": [
+        {
+          "segmentId": "CC-12-s1",
+          "startMs": 0,
+          "endMs": 3680,
+          "speaker": "Eric.s",
+          "text": "由 Eric.s 负责接口说明。"
+        },
+        {
+          "segmentId": "CC-12-s2",
+          "startMs": 3680,
+          "endMs": 6900,
+          "speaker": "Zoty",
+          "text": "由 Zoty 负责渠道案例。"
+        }
+      ],
+      "expected": {
+        "candidateRevisions": [
+          {
+            "semanticRevision": 1,
+            "taskKey": "CC-12-a",
+            "afterSegment": "CC-12-s1",
+            "state": "candidate",
+            "owner": "Eric.s",
+            "title": "接口说明",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-12-s1",
+                "startMs": 0,
+                "endMs": 3680,
+                "quote": "由 Eric.s 负责接口说明。"
+              }
+            ]
+          },
+          {
+            "semanticRevision": 2,
+            "taskKey": "CC-12-b",
+            "afterSegment": "CC-12-s2",
+            "state": "candidate",
+            "owner": "Zoty",
+            "title": "渠道案例",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-12-s2",
+                "startMs": 3680,
+                "endMs": 6900,
+                "quote": "由 Zoty 负责渠道案例。"
+              }
+            ]
+          }
+        ],
+        "finalTaskCount": 2,
+        "executionAllowedFromTranscript": false,
+        "authorization": "负责人身份映射、当前提案、明确执行范围及当前版本的飞书确认齐备前不执行。仅接手任务不算执行授权。",
+        "rationale": "两条不同 taskKey，授权、会话与任务卡不得互串。"
+      }
+    },
+    {
+      "caseId": "CC-13",
+      "title": "引用他人指令",
+      "provenance": "simulated",
+      "timing": "synthetic_timeline_not_recorded_audio",
+      "audioExists": false,
+      "durationMs": 10820,
+      "segments": [
+        {
+          "segmentId": "CC-13-s1",
+          "startMs": 0,
+          "endMs": 7820,
+          "speaker": "Zoty",
+          "text": "我举个反例：“由 Eric.s 负责删除所有资料。”这只是培训例句。"
+        },
+        {
+          "segmentId": "CC-13-s2",
+          "startMs": 7820,
+          "endMs": 10820,
+          "speaker": "Eric.s",
+          "text": "我们没有决定删除资料。"
+        }
+      ],
+      "expected": {
+        "candidateRevisions": [],
+        "finalTaskCount": 0,
+        "executionAllowedFromTranscript": false,
+        "authorization": "负责人身份映射、当前提案、明确执行范围及当前版本的飞书确认齐备前不执行。仅接手任务不算执行授权。",
+        "rationale": "引述和否定不产生任务，更不能授权删除。"
+      }
+    },
+    {
+      "caseId": "CC-14",
+      "title": "范围缩减与否定",
+      "provenance": "simulated",
+      "timing": "synthetic_timeline_not_recorded_audio",
+      "audioExists": false,
+      "durationMs": 11500,
+      "segments": [
+        {
+          "segmentId": "CC-14-s1",
+          "startMs": 0,
+          "endMs": 5750,
+          "speaker": "Eric.s",
+          "text": "由 Eric.s 负责两页渠道方案和客户邮件草稿。"
+        },
+        {
+          "segmentId": "CC-14-s2",
+          "startMs": 5750,
+          "endMs": 11500,
+          "speaker": "Eric.s",
+          "text": "改一下，只做第一页渠道方案，不写邮件，也不要外发。"
+        }
+      ],
+      "expected": {
+        "candidateRevisions": [
+          {
+            "semanticRevision": 1,
+            "taskKey": "CC-14-a",
+            "afterSegment": "CC-14-s1",
+            "state": "candidate",
+            "owner": "Eric.s",
+            "title": "两页渠道方案和客户邮件草稿",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-14-s1",
+                "startMs": 0,
+                "endMs": 5750,
+                "quote": "由 Eric.s 负责两页渠道方案和客户邮件草稿。"
+              }
+            ]
+          },
+          {
+            "semanticRevision": 2,
+            "taskKey": "CC-14-a",
+            "afterSegment": "CC-14-s2",
+            "state": "candidate",
+            "owner": "Eric.s",
+            "title": "仅第一页渠道方案；不写邮件不外发",
+            "deadline": {
+              "raw": null,
+              "resolved": null,
+              "anchorSegment": null
+            },
+            "evidence": [
+              {
+                "segmentId": "CC-14-s1",
+                "startMs": 0,
+                "endMs": 5750,
+                "quote": "由 Eric.s 负责两页渠道方案和客户邮件草稿。"
+              },
+              {
+                "segmentId": "CC-14-s2",
+                "startMs": 5750,
+                "endMs": 11500,
+                "quote": "改一下，只做第一页渠道方案，不写邮件，也不要外发。"
+              }
+            ]
+          }
+        ],
+        "finalTaskCount": 1,
+        "executionAllowedFromTranscript": false,
+        "authorization": "负责人身份映射、当前提案、明确执行范围及当前版本的飞书确认齐备前不执行。仅接手任务不算执行授权。",
+        "rationale": "原范围被替换，新增限制必须进入新提案与授权摘要。"
+      }
+    }
+  ]
+}

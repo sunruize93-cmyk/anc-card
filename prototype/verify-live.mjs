@@ -44,7 +44,7 @@ try {
   assert.ok(completed, '转写尚未完成，原录音和队列记录已保留。');
   assert.ok(completed.transcript.length > 0);
   assert.equal(completed.ledger.length, 2, '请回听核对识别结果，样本预期有两条行动项。');
-  assert.deepEqual(completed.ledger.map(task => [task.owner, task.deadline]), [['小王', '本周五'], ['小李', '下周一']]);
+  assert.deepEqual(completed.ledger.map(task => [task.owner, task.deadline]), [['Zoty', '本周五'], ['Eric.s', '下周一']]);
   for (const segment of completed.transcript) {
     assert.equal(segment.engine, 'speakmode');
     assert.equal(segment.model, 'qwen3-asr-flash');

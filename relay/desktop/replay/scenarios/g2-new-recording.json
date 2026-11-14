@@ -1,0 +1,392 @@
+{
+  "id": "G2",
+  "group": "新录音发现（真实的 Windows watch 循环，离线注入连接）",
+  "provenance": "全部合成：文件名、时间线、录音状态、3-3 事件。A 卡实测从没观察到 3-3（见 protocol-fixtures），卡在录音中会不会把进行中的文件列出来也未知。",
+  "baseline": [
+    "note20261114-090000."
+  ],
+  "variants": [
+    {
+      "name": "A 停止录音但没有 3-3，下一次轮询列表发现新增",
+      "watch": {
+        "poll_s": 0.25,
+        "settle_s": 0.05,
+        "run_s": 2.2
+      },
+      "card": {
+        "files": [
+          {
+            "from_ms": 0,
+            "names": [
+              "note20261114-090000."
+            ]
+          },
+          {
+            "from_ms": 600,
+            "names": [
+              "note20261114-090000.",
+              "note20261114-100000."
+            ]
+          }
+        ],
+        "record_state": [
+          {
+            "from_ms": 0,
+            "state": 2
+          },
+          {
+            "from_ms": 200,
+            "state": 1
+          },
+          {
+            "from_ms": 600,
+            "state": 2
+          }
+        ]
+      },
+      "expect": {
+        "downloads": [
+          "note20261114-100000.wav"
+        ],
+        "no_download_before_ms": 600,
+        "found_by_ms": 1800
+      }
+    },
+    {
+      "name": "B 同一条 3-3 重复到达两次，同一文件只下载一次",
+      "watch": {
+        "poll_s": 5.0,
+        "settle_s": 0.05,
+        "run_s": 2.0
+      },
+      "card": {
+        "files": [
+          {
+            "from_ms": 0,
+            "names": [
+              "note20261114-090000."
+            ]
+          },
+          {
+            "from_ms": 600,
+            "names": [
+              "note20261114-090000.",
+              "note20261114-100000."
+            ]
+          }
+        ],
+        "unsolicited": [
+          {
+            "at_ms": 650,
+            "channel": "ae23",
+            "frames": [
+              {
+                "type": 3,
+                "cmd": 3,
+                "seq": 0
+              }
+            ]
+          },
+          {
+            "at_ms": 660,
+            "channel": "ae23",
+            "frames": [
+              {
+                "type": 3,
+                "cmd": 3,
+                "seq": 0
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "downloads": [
+          "note20261114-100000.wav"
+        ],
+        "found_by_ms": 1600,
+        "lists_after_ms": {
+          "from_ms": 640,
+          "count": 1,
+          "why": "两条重复的 3-3 只触发一次对账"
+        }
+      }
+    },
+    {
+      "name": "C 录音进行中，列表已经出现正在录的文件（卡是否这样做：未知）",
+      "known_gap": "Windows watch 不查录音状态（3-19），列表里一出现新名字就下载。如果卡在录音中就把文件列出来，会下到不完整的文件。卡是否这样做需要硬件确认。",
+      "watch": {
+        "poll_s": 0.25,
+        "settle_s": 0.05,
+        "run_s": 1.6
+      },
+      "card": {
+        "files": [
+          {
+            "from_ms": 0,
+            "names": [
+              "note20261114-090000."
+            ]
+          },
+          {
+            "from_ms": 200,
+            "names": [
+              "note20261114-090000.",
+              "note20261114-100000."
+            ]
+          }
+        ],
+        "record_state": [
+          {
+            "from_ms": 0,
+            "state": 2
+          },
+          {
+            "from_ms": 150,
+            "state": 1
+          },
+          {
+            "from_ms": 900,
+            "state": 2
+          }
+        ]
+      },
+      "expect": {
+        "downloads": [
+          "note20261114-100000.wav"
+        ],
+        "no_download_before_ms": 900
+      }
+    },
+    {
+      "name": "D 正在下载第一条时按下保存，第二条的 3-3 不能被吃掉",
+      "watch": {
+        "poll_s": 10.0,
+        "settle_s": 0.05,
+        "run_s": 3.0
+      },
+      "card": {
+        "ms_per_data_frame": 2.0,
+        "wav_seconds": 2.0,
+        "files": [
+          {
+            "from_ms": 0,
+            "names": [
+              "note20261114-090000."
+            ]
+          },
+          {
+            "from_ms": 300,
+            "names": [
+              "note20261114-090000.",
+              "note20261114-100000."
+            ]
+          },
+          {
+            "from_ms": 500,
+            "names": [
+              "note20261114-090000.",
+              "note20261114-100000.",
+              "note20261114-100500."
+            ]
+          }
+        ],
+        "unsolicited": [
+          {
+            "at_ms": 300,
+            "channel": "ae23",
+            "frames": [
+              {
+                "type": 3,
+                "cmd": 3,
+                "seq": 0
+              }
+            ]
+          },
+          {
+            "at_ms": 500,
+            "channel": "ae23",
+            "frames": [
+              {
+                "type": 3,
+                "cmd": 3,
+                "seq": 0
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "downloads": [
+          "note20261114-100000.wav",
+          "note20261114-100500.wav"
+        ],
+        "found_by_ms": 2500,
+        "lists_after_ms": {
+          "from_ms": 280,
+          "count": 2,
+          "why": "第一条 3-3 触发一次对账；下载期间到达的第二条 3-3 保留下来，下载完成后再触发一次"
+        }
+      },
+      "fixed": "本轮修复：AE23 机身事件在到达时就分流进独立的事件队列，pull_file 等待应答时读不到、也吞不掉。修复前的失败见 evidence/before.txt。"
+    },
+    {
+      "name": "E 下载期间同一条 3-3 重复到达两次，只算一次待处理事件",
+      "watch": {
+        "poll_s": 10.0,
+        "settle_s": 0.05,
+        "run_s": 3.0
+      },
+      "card": {
+        "ms_per_data_frame": 2.0,
+        "wav_seconds": 2.0,
+        "files": [
+          {
+            "from_ms": 0,
+            "names": [
+              "note20261114-090000."
+            ]
+          },
+          {
+            "from_ms": 300,
+            "names": [
+              "note20261114-090000.",
+              "note20261114-100000."
+            ]
+          },
+          {
+            "from_ms": 500,
+            "names": [
+              "note20261114-090000.",
+              "note20261114-100000.",
+              "note20261114-100500."
+            ]
+          }
+        ],
+        "unsolicited": [
+          {
+            "at_ms": 300,
+            "channel": "ae23",
+            "frames": [
+              {
+                "type": 3,
+                "cmd": 3,
+                "seq": 0
+              }
+            ]
+          },
+          {
+            "at_ms": 500,
+            "channel": "ae23",
+            "frames": [
+              {
+                "type": 3,
+                "cmd": 3,
+                "seq": 0
+              }
+            ]
+          },
+          {
+            "at_ms": 520,
+            "channel": "ae23",
+            "frames": [
+              {
+                "type": 3,
+                "cmd": 3,
+                "seq": 0
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "downloads": [
+          "note20261114-100000.wav",
+          "note20261114-100500.wav"
+        ],
+        "found_by_ms": 2500,
+        "lists_after_ms": {
+          "from_ms": 280,
+          "count": 2,
+          "why": "500 和 520 两条重复的 3-3 合并成一个待处理事件，只多一次对账"
+        }
+      }
+    },
+    {
+      "name": "F 3-3 和下载数据、电量应答在两个通道上错序交错到达",
+      "watch": {
+        "poll_s": 10.0,
+        "settle_s": 0.05,
+        "run_s": 3.0
+      },
+      "card": {
+        "ms_per_data_frame": 2.0,
+        "wav_seconds": 2.0,
+        "files": [
+          {
+            "from_ms": 0,
+            "names": [
+              "note20261114-090000."
+            ]
+          },
+          {
+            "from_ms": 300,
+            "names": [
+              "note20261114-090000.",
+              "note20261114-100000."
+            ]
+          },
+          {
+            "from_ms": 600,
+            "names": [
+              "note20261114-090000.",
+              "note20261114-100000.",
+              "note20261114-100500."
+            ]
+          }
+        ],
+        "unsolicited": [
+          {
+            "at_ms": 300,
+            "channel": "ae23",
+            "frames": [
+              {
+                "type": 3,
+                "cmd": 3,
+                "seq": 0
+              }
+            ]
+          },
+          {
+            "at_ms": 600,
+            "channel": "ae23",
+            "split_at": [
+              3
+            ],
+            "frames": [
+              {
+                "type": 0,
+                "cmd": 4,
+                "params_hex": "63",
+                "seq": 9
+              },
+              {
+                "type": 3,
+                "cmd": 3,
+                "seq": 0
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "downloads": [
+          "note20261114-100000.wav",
+          "note20261114-100500.wav"
+        ],
+        "found_by_ms": 2500,
+        "note": "600 ms 那条 AE23 通知把一个不请自来的 0-4 和一个 3-3 拼在一起、再从中间拆开；0-4 进应答队列，3-3 进事件队列"
+      }
+    }
+  ]
+}
