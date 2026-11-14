@@ -1,5 +1,7 @@
 # Zoty 的开发清单 · Windows / macOS 联调录音卡与 iPhone · 2026-11-14
 
+**当前优先级：** 先按[单卡本机计划](single-card-local-plan.md)完成 Eric.s 的局域网自动闭环；公网、服务器、TestFlight 已列入[待办](deferred-work.md)，本轮不启动。
+
 ## 当前只做这一项（2026-11-14 更新）
 
 A 卡独立 BLE 取音已交付。Eric.s 核对 BLE WAV 为 409,644 字节、12.8 秒，与 USB 原件 SHA-256 完全一致；OPUS 为 25,640 字节，哈希与交接单相符。交接单中的未激活/未绑定、三次下载一致、WAV 与 OPUS 各一次断连续传属于 Zoty 实测报告；尚未扩展到长录音或五卡稳定性。
