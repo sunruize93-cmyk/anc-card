@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { syncInbox } from './feishu-inbox.mjs';
 import { maxAudioBytes } from './recordings.mjs';
+import { syncRecordingDelivery } from './recording-delivery.mjs';
 
 const logger = { error() {}, warn() {}, info() {}, debug() {}, trace() {} };
 const labels = { needs_review: '待核对', awaiting: '待负责人确认', queued: '已入执行队列',
@@ -115,6 +116,7 @@ export async function openFeishu(directory, tasks, recordings) {
       }
     }
     await syncInbox({ inbox: recordings.inbox, recordings, client, config, call, maxBytes: maxAudioBytes });
+    await syncRecordingDelivery({ delivery: recordings.delivery, recordings, client, config, call });
   }
   const timer = setInterval(() => { if (!pending) pending = sync().finally(() => { pending = undefined; }); }, 1200);
 
@@ -131,7 +133,7 @@ export async function openFeishu(directory, tasks, recordings) {
           chatId: input.chatId || null, ownerOpenId: input.ownerOpenId || null };
         if (!/^cli_[A-Za-z0-9_-]+$/.test(next.appId || '') || typeof next.appSecret !== 'string' ||
             !next.appSecret.trim() || next.appSecret.length > 4096) throw new Error('请填写有效的 App ID 和 App Secret。');
-        if ((recordings.inbox.hasBindings() || tasks.list().some(task => task.origin === 'recording' && task.ownerOpenId && task.ownerOpenId !== 'local')) &&
+        if ((recordings.inbox.hasBindings() || recordings.delivery.hasBindings() || tasks.list().some(task => task.origin === 'recording' && task.ownerOpenId && task.ownerOpenId !== 'local')) &&
             (next.appId !== config?.appId || next.chatId !== config?.chatId)) throw new Error('已有任务卡片绑定当前应用和群，请保留其绑定。');
         const api = newClient(next);
         if (next.chatId) {

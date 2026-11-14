@@ -36,6 +36,12 @@ async function jsonBody(request) {
 }
 
 async function importRecording(request, response) {
+  const publish = request.headers['x-anc-publish'] === '1';
+  const binding = feishu.status();
+  const device = request.headers['x-anc-device'];
+  if (publish && (!binding.appId || !binding.chatId || !/^[A-Za-z0-9_-]{1,100}$/.test(device || ''))) {
+    return reply(response, 409, { error: '请先配置飞书目标群与上传设备。' });
+  }
   let name;
   try {
     name = decodeURIComponent(request.headers['x-anc-filename']);
@@ -52,11 +58,17 @@ async function importRecording(request, response) {
   }
   if (declared > maxAudioBytes) return reply(response, 413, { error: '单个文件最多 64 MiB。' });
   const chunks = [];
-  for await (const chunk of request) chunks.push(chunk);
+  let received = 0;
+  for await (const chunk of request) {
+    received += chunk.length;
+    if (received > declared) return reply(response, 413, { error: '实际音频超过声明大小。' });
+    chunks.push(chunk);
+  }
   const audio = Buffer.concat(chunks);
   if (audio.length !== declared) return reply(response, 400, { error: '上传未完成。' });
 
   const result = recordings.import(name, audio);
+  if (publish) recordings.delivery.enqueue({ ...binding, recordingId: result.recording.id, device, name });
   return reply(response, result.duplicate ? 200 : 202, result);
 }
 
@@ -159,6 +171,15 @@ const server = createServer(async (request, response) => {
         return reply(response, 500, { error: '录音导入失败，请查看启动终端。' });
       }
     }
+  }
+  const deliveryRoute = /^\/api\/recordings\/([a-f0-9]{64})\/delivery$/.exec(request.url);
+  if (deliveryRoute && request.method === 'GET') {
+    const recording = recordings.get(deliveryRoute[1]);
+    if (!recording) return reply(response, 404, { error: '录音不存在。' });
+    const row = recordings.delivery.get(feishu.status(), recording.id);
+    return reply(response, 200, { recordingId: recording.id, status: recording.status, error: recording.error,
+      feishu: row ? { state: row.finished ? 'complete' : row.error ? 'retrying' : row.messageId ? 'updating' : 'pending',
+        messageId: row.messageId, error: row.error } : { state: 'not_requested' } });
   }
   const recordingRoute = /^\/api\/recordings\/([a-f0-9]{64})\/(audio|retry)$/.exec(request.url);
   if (recordingRoute) {
