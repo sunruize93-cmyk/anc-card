@@ -69,7 +69,8 @@
 - [x] 用户 Personal Team 自动签名、真机安装成功；首次启动被设备信任拦截，用户完成信任并确认看到“ANC · 真机环境检查”。随后 `devicectl` 再次启动返回 success 和进程 ID。
 - [ ] 拔线后重新启动 App、Xcode IDE Run 与断点调试；模拟器下载完成后再补验收。
 - [ ] 原生 App 现有 WAV 上传。
-- [ ] Zoty 源码接收后 BLE 自动取音与上传。
+- [x] 收到 Zoty 桌面源码 804b764；Mac 独立环境复跑 110 项测试通过，两次 Windows 上传事件已核实。
+- [ ] 接收他已经写好的 relay-ios 2b550ee，修正旧接口后编译；iPhone BLE 自动取音与上传仍待验收。
 
 ## 本机复现与证据
 

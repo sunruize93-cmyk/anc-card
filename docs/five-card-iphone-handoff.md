@@ -4,11 +4,11 @@
 
 A 卡独立 BLE 取音已交付。Eric.s 核对 BLE WAV 为 409,644 字节、12.8 秒，与 USB 原件 SHA-256 完全一致；OPUS 为 25,640 字节，哈希与交接单相符。交接单中的未激活/未绑定、三次下载一致、WAV 与 OPUS 各一次断连续传属于 Zoty 实测报告；尚未扩展到长录音或五卡稳定性。
 
-**Zoty 现在只需补交已有成果：** ancrelay 0.2.0 / relay-desktop 的源码包或分支提交号，以及最小启动命令。交付前排除设备 token、私钥、飞书配置和录音原件；不要为了交付新增硬件测试。
+**Zoty 现在只需补交已有成果：** relay-ios 2b550ee 的源码 ZIP（QS668Kit、ANCRelay、已有测试、BUILD-ON-MAC.md、依赖与许可），附完整提交号、字节数和 SHA-256，并注明未编译、旧上传接口及其他已知缺口。桌面 ancrelay 0.2.0 / 804b764 已收到，Eric.s 本机复跑 110 项测试通过。详见 [交接核验](zoty-source-review-2026-11-14.md)。交付前排除设备 token、私钥、飞书配置和录音原件；不要为了交付新增硬件测试。
 
 Eric.s 已完成 A 卡真实转写、同一 Codex 会话执行与原卡回写，以及 iPhone Safari 前台选择现有 WAV 上传、复用已有转写、自动发飞书结果卡。手机 BLE 自动取音、锁屏上传仍未通过。Eric.s 的 Mac 已装 Xcode 26.6，已用 iOS 26.6 真机完成最小 App 签名、安装和启动；蓝牙适配仍由 Eric.s 端接入。详见 [真机环境记录](iphone-development-environment.md)。
 
-保持一个主 bot。Zoty 已加入应用可用范围；独立 HTTPS 上传凭证和测试 CA 已由主 bot **私聊**交付，只允许设备上传和查询，不提供 App Secret 或管理权限。地址仅同一 Wi-Fi 可达，Mac 后台需要在线；凭证到 2026-11-15 13:07（韩国时间）失效。客户端 POST 原始音频字节，带 Authorization、Content-Length、X-ANC-Filename、X-Recording-ID、X-Content-SHA256；保持同一录音的 ID 与哈希。A 卡已有原件返回 `duplicate:true` 属正常去重。iPhone 两次上传已验证同一录音和去重；Windows 上传回执尚未验收，不因凭证交付就勾选完成。
+保持一个主 bot。Zoty 已加入应用可用范围；独立 HTTPS 上传凭证和测试 CA 已由主 bot **私聊**交付，只允许设备上传和查询，不提供 App Secret 或管理权限。地址仅同一 Wi-Fi 可达，Mac 后台需要在线；凭证到 2026-11-15 13:07（韩国时间）失效。客户端 POST 原始音频字节，带 Authorization、Content-Length、X-ANC-Filename、X-Recording-ID、X-Content-SHA256；保持同一录音的 ID 与哈希。A 卡已有原件返回 `duplicate:true` 属正常去重。iPhone 两次上传已验证同一录音和去重；Windows 两次上传也已验收：13:19（韩国时间）后台 upload_events 记录两次 Zoty-A / A-001、相同 SHA-256、duplicate=1，与交接单一致；该样本此前已导入，尚未验证新音频首传 201。
 
 下文保留完整后续方案，不是本轮追加任务。五卡回归、长时推流、官方 App 对照和 iPhone 客户端开发暂缓派发；后台重放、转写、文档、飞书及后续 iPhone 集成由 Eric.s 推进。
 
