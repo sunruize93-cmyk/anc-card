@@ -2,7 +2,7 @@
 
 > **2026-11-14 当前状态**：一张实卡、iPhone 锁屏、70.8 秒同源录音已走完自动取音上传、SpeakMode/百炼转写、飞书负责人确认、Codex 两轮与原卡验收。仍限同 Wi-Fi、Mac 在线；不是长会议或五人稳定性承诺。
 >
-> 最新入口：[给所有人看的 MVP 说明](docs/ANC-Card-MVP-分享说明-2026-11-14.md) · [当日审查与发布范围](docs/release-review-2026-11-14.md) · [当前待办](docs/MVP-TODO.md) · [未来路线图](docs/ROADMAP.md) · [iPhone 源码与构建](relay/ios/README.md)
+> 最新入口：[给所有人看的 MVP 说明](docs/ANC-Card-MVP-分享说明-2026-11-14.md) · [当日审查与发布范围](docs/release-review-2026-11-14.md) · [当前待办](docs/MVP-TODO.md) · [未来路线图](docs/ROADMAP.md) · [iPhone 源码与构建](relay/ios/README.md) · [从 GitHub 恢复开发](docs/恢复开发.md)
 >
 > 下文 11 月 7 日、11 日段落保留为历史验收记录；“当时待实测”不代表今日状态。诊所模式是单独实验，不包含在本次卡到手机 MVP 的质量结论中。
 
