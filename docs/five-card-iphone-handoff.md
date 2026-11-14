@@ -6,7 +6,7 @@ A 卡独立 BLE 取音已交付。Eric.s 核对 BLE WAV 为 409,644 字节、12.
 
 **Zoty 现在只需补交已有成果：** ancrelay 0.2.0 / relay-desktop 的源码包或分支提交号，以及最小启动命令。交付前排除设备 token、私钥、飞书配置和录音原件；不要为了交付新增硬件测试。
 
-Eric.s 已完成 A 卡真实转写、同一 Codex 会话执行与原卡回写，以及 iPhone Safari 前台选择现有 WAV 上传、复用已有转写、自动发飞书结果卡。手机 BLE 自动取音、锁屏上传仍未通过。Mac 尚无完整 Xcode。
+Eric.s 已完成 A 卡真实转写、同一 Codex 会话执行与原卡回写，以及 iPhone Safari 前台选择现有 WAV 上传、复用已有转写、自动发飞书结果卡。手机 BLE 自动取音、锁屏上传仍未通过。Eric.s 的 Mac 已装 Xcode 26.6，已用 iOS 26.6 真机完成最小 App 签名、安装和启动；蓝牙适配仍由 Eric.s 端接入。详见 [真机环境记录](iphone-development-environment.md)。
 
 保持一个主 bot。Zoty 已加入应用可用范围；独立 HTTPS 上传凭证和测试 CA 已由主 bot **私聊**交付，只允许设备上传和查询，不提供 App Secret 或管理权限。地址仅同一 Wi-Fi 可达，Mac 后台需要在线；凭证到 2026-11-15 13:07（韩国时间）失效。客户端 POST 原始音频字节，带 Authorization、Content-Length、X-ANC-Filename、X-Recording-ID、X-Content-SHA256；保持同一录音的 ID 与哈希。A 卡已有原件返回 `duplicate:true` 属正常去重。iPhone 两次上传已验证同一录音和去重；Windows 上传回执尚未验收，不因凭证交付就勾选完成。
 
@@ -95,7 +95,7 @@ $wav = (Read-Host '本地测试 WAV 的完整路径').Trim('"')
 
 ## 4 · 自动上传和 iOS 后台恢复
 
-双方开工时确认一份测试接口。以下是移动端拟定约定，后台负责人提供实际 HTTPS 地址和按设备绑定的短期测试凭证。当前 Mac 本机接口是 `POST /api/recordings`，监听 `127.0.0.1:4785`，返回 `{duplicate, recording}`。iPhone 使用的鉴权入口需另行接通。
+双方开工时确认一份测试接口。以下是移动端拟定约定，后台负责人提供实际 HTTPS 地址和按设备绑定的短期测试凭证。当前 Mac 本机接口是 `POST /api/recordings`，监听 `127.0.0.1:4785`，返回 `{duplicate, recording}`。iPhone 鉴权入口已接通：`POST /v1/recordings` 收原始音频字节，返回录音 ID、哈希、大小、去重标记及结果查询路径；局域网地址与设备凭证私下交付。
 
 | 客户端发什么 | 服务端怎样答 | 两端怎样判断完成 |
 |---|---|---|
