@@ -6,7 +6,7 @@ export const transcript = {
   text: '下次碰面前给合作方一个可运行的接口示例和调用说明。还有一项，接口遇到 HTTP 429 时只重试一次，并补一个测试来证明它能正常恢复。',
   criteria: [
     { id: 'example', label: '正常请求能返回结果' },
-    { id: 'guide', label: '有可运行的调用说明' },
+    { id: 'guide', label: '调用说明可运行且与实测行为一致' },
     { id: 'rate-limit', label: '429 仅重试一次，测试覆盖成功恢复和再次失败' },
   ],
 };
@@ -46,7 +46,7 @@ export function receiveResult(state, result) {
   const proposal = {
     id: randomUUID(), round, criterion: missing[0].id,
     title: '给现有接口示例补上 429 重试',
-    action: '在原有 client.mjs 中增加 429 的单次重试，保留其他状态的原有行为。随后重跑验收脚本。',
+    action: '在原有 client.mjs 中增加 429 的单次重试，保留其他状态的原有行为；同步更新 USAGE.md 的行为说明。随后重跑包含文档一致性的验收脚本。',
     reason: '任务来源明确包含 429 单次重试。正常请求和调用说明已通过，429 验收失败。',
     acceptance: missing[0].label,
     source: `${state.transcript.id} · ${state.transcript.time}`,
