@@ -68,7 +68,7 @@
 - [x] 手机开发者模式开启后复查：enabled，paired / wired / connected。
 - [x] 用户 Personal Team 自动签名、真机安装成功；首次启动被设备信任拦截，用户完成信任并确认看到“ANC · 真机环境检查”。随后 `devicectl` 再次启动返回 success 和进程 ID。
 - [ ] 拔线后重新启动 App、Xcode IDE Run 与断点调试；模拟器下载完成后再补验收。
-- [ ] 原生 App 现有 WAV 上传。
+- [x] 原生 App 上传预置 A 卡 WAV，手机／后台回执一致，复用飞书原结果卡；App 重启后重传仍命中同一录音。系统文件选择器另待验收。见 [本轮报告](iphone-native-upload-acceptance-2026-11-14.md)。
 - [x] 收到 Zoty 桌面源码 804b764；Mac 独立环境复跑 110 项测试通过，两次 Windows 上传事件已核实。
 - [ ] 接收他已经写好的 relay-ios 2b550ee，修正旧接口后编译；iPhone BLE 自动取音与上传仍待验收。
 
@@ -78,4 +78,4 @@
 
 同目录保存构建日志、安装与启动 JSON、环境检查结果。`build-signed.log` 为 BUILD SUCCEEDED，`install-device.json` 为 success，`launch-device-verified.json` 为 success；先前失败日志保留，不覆盖历史失败。用户目视确认与工具启动结果共同构成本轮真机启动验收。
 
-本轮未接入卡到手机的取音，也未把 Safari 手动上传计作原生自动上传。下一步先复用现有 WAV 验收原生上传，再结合 Zoty 已完成的源码交付适配 Core Bluetooth。
+本轮未接入卡到手机的取音，也未把 Safari 手动上传计作原生自动上传。原生已有 WAV 上传已通过，下一步结合 Zoty 已完成的源码交付适配 Core Bluetooth。
