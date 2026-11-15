@@ -10,7 +10,8 @@
     "authorize:clinic": "sh prototype/scripts/authorize-clinic.sh",
     "verify": "node prototype/verify.mjs && node --test prototype/mobile-gateway.test.mjs prototype/recording-delivery.test.mjs prototype/worker.test.mjs prototype/codex-executor.test.mjs prototype/personal-agent.test.mjs prototype/tasks.test.mjs prototype/feishu-inbox.test.mjs prototype/clinic-turns.test.mjs prototype/clinic-local.test.mjs",
     "verify:upload-recovery": "node --test prototype/upload-recovery.test.mjs prototype/device-config.test.mjs prototype/recording-delivery.test.mjs",
-    "verify:asr-parallel": "node --test prototype/asr-pool.test.mjs prototype/recording-progress.test.mjs prototype/speakmode-retry.test.mjs prototype/speakmode-errors.test.mjs prototype/long-recording.test.mjs prototype/upload-recovery.test.mjs prototype/recording-delivery.test.mjs"
+    "verify:asr-parallel": "node --test prototype/asr-pool.test.mjs prototype/recording-progress.test.mjs prototype/speakmode-retry.test.mjs prototype/speakmode-errors.test.mjs prototype/long-recording.test.mjs prototype/upload-recovery.test.mjs prototype/recording-delivery.test.mjs",
+    "verify:asr-long": "node --test prototype/benchmarks/long-asr.test.mjs"
   },
   "dependencies": {
     "@larksuiteoapi/node-sdk": "1.76.0"
