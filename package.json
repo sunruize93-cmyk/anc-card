@@ -8,7 +8,8 @@
     "start:clinic": "ANC_ASR_PROFILE=clinic node prototype/server.mjs",
     "start:clinic:local": "ANC_ASR_PROFILE=clinic-local node prototype/server.mjs",
     "authorize:clinic": "sh prototype/scripts/authorize-clinic.sh",
-    "verify": "node prototype/verify.mjs && node --test prototype/mobile-gateway.test.mjs prototype/recording-delivery.test.mjs prototype/worker.test.mjs prototype/codex-executor.test.mjs prototype/personal-agent.test.mjs prototype/tasks.test.mjs prototype/feishu-inbox.test.mjs prototype/clinic-turns.test.mjs prototype/clinic-local.test.mjs"
+    "verify": "node prototype/verify.mjs && node --test prototype/mobile-gateway.test.mjs prototype/recording-delivery.test.mjs prototype/worker.test.mjs prototype/codex-executor.test.mjs prototype/personal-agent.test.mjs prototype/tasks.test.mjs prototype/feishu-inbox.test.mjs prototype/clinic-turns.test.mjs prototype/clinic-local.test.mjs",
+    "verify:upload-recovery": "node --test prototype/upload-recovery.test.mjs prototype/device-config.test.mjs prototype/recording-delivery.test.mjs"
   },
   "dependencies": {
     "@larksuiteoapi/node-sdk": "1.76.0"
