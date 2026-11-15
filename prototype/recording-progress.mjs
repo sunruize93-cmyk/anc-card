@@ -21,7 +21,8 @@ export function describeProgress(progress, status, { coarse = false } = {}) {
   if (status === 'complete' && total === 0) return '分段完成，未检出待识别的有声片段；请回听原音核对';
   if (coarse && status === 'processing' && total) return `转写进度约 ${Math.floor(count / total * 10) * 10}%（按音频片段计）`;
   const reused = p.reusedChunks > 0 ? ` · 本轮复用 ${p.reusedChunks} 段` : '';
+  const parallel = status === 'processing' && p.concurrency > 1 ? ` · 并行上限 ${p.concurrency}，当前 ${p.activeChunks?.length ?? 0} 段` : '';
   const at = status === 'processing' && p.currentChunk ?
     ` · 当前原音 ${audioTime(p.currentChunk.startMs)}–${audioTime(p.currentChunk.endMs)}` : '';
-  return completed + reused + at;
+  return completed + reused + parallel + at;
 }

@@ -1,3 +1,4 @@
+import { parseAsrConcurrency, transcribeStandardChunks } from './asr-pool.mjs';
 import { describeProgress } from './recording-progress.mjs';
 import { decodeRawOpus, rawOpusFormat, validateRawOpus } from './audio/qs668.mjs';
 import { openCoffeeDrills } from './coffee-drill.mjs';
@@ -18,7 +19,7 @@ import { maxAudioBytes } from './audio-limits.mjs';
 export { maxAudioBytes } from './audio-limits.mjs';
 export const audioTypes = { '.wav': 'audio/wav', '.m4a': 'audio/mp4', '.mp3': 'audio/mpeg', '.opus': 'application/octet-stream' };
 
-async function transcribe(audio, extension, scratch, signal, cache, profile, audioFormat, saveDecode, recognize, report) {
+async function transcribe(audio, extension, scratch, signal, cache, profile, audioFormat, saveDecode, recognize, report, concurrency) {
   const directory = await mkdtemp(join(scratch, 'job-'));
   const original = join(directory, 'original' + extension);
   const wav = join(directory, 'normalized.wav');
@@ -40,29 +41,18 @@ async function transcribe(audio, extension, scratch, signal, cache, profile, aud
     if ((await stat(wav)).size > maxAudioBytes) throw new Error('标准化后的 WAV 超过 256 MiB，请先无损分段并保留原音。');
     normalized = await readFile(wav);
     }
-    const segments = [];
     const chunks = splitWav(normalized);
     const standard = profile !== 'clinic' && profile !== 'clinic-local';
-    const cached = new Map(standard ? chunks.map(chunk => [chunk.index, cache.get(chunk)]).filter(([, segment]) => segment) : []);
-    let completedChunks = cached.size;
-    report({ stage: 'transcribing', totalChunks: chunks.length, completedChunks,
-      reusedChunks: standard ? cached.size : null, currentChunk: null });
+    if (standard) return await transcribeStandardChunks({chunks, cache, recognize, directory, signal, report, concurrency});
+    // Clinic adapters maintain their own checkpoints; deliberately remain serial.
+    const segments = [];
+    let completedChunks = 0;
+    report({stage:'transcribing',concurrency:1,totalChunks:chunks.length,completedChunks,reusedChunks:null,currentChunk:null});
     for (const chunk of chunks) {
       signal.throwIfAborted();
-      if (!cached.has(chunk.index)) report({ currentChunk: { index: chunk.index, startMs: chunk.startMs, endMs: chunk.endMs } });
-      if (profile === 'clinic' || profile === 'clinic-local') {
-        segments.push(...await transcribeClinicChunk(chunk, directory, signal, cache.clinic, profile === 'clinic-local'));
-        report({ completedChunks: ++completedChunks, currentChunk: null });
-        continue;
-      }
-      let segment = cached.get(chunk.index);
-      if (!segment) {
-        segment = await recognize(chunk, directory, signal);
-        signal.throwIfAborted();
-        cache.put(chunk, segment);
-        report({ completedChunks: ++completedChunks, currentChunk: null });
-      }
-      segments.push(segment);
+      report({currentChunk:{index:chunk.index,startMs:chunk.startMs,endMs:chunk.endMs}});
+      segments.push(...await transcribeClinicChunk(chunk, directory, signal, cache.clinic, profile === 'clinic-local'));
+      report({completedChunks:++completedChunks,currentChunk:null});
     }
     return segments;
   } finally {
@@ -87,7 +77,8 @@ export function extract(segments) {
   });
 }
 
-export async function openRecordings(directory, { transcribeSegment = transcribeChunk } = {}) {
+export async function openRecordings(directory, { transcribeSegment = transcribeChunk, concurrency = parseAsrConcurrency() } = {}) {
+  concurrency = parseAsrConcurrency(concurrency);
   await mkdir(directory, { recursive: true, mode: 0o700 });
   const scratch = join(directory, 'asr-work');
   const db = new DatabaseSync(join(directory, 'recordings.sqlite'));
@@ -186,7 +177,7 @@ export async function openRecordings(directory, { transcribeSegment = transcribe
             return segment?.requestedLanguage === requestedLanguage ? segment : null;
           },
           put: (chunk, segment) => saveChunk.run(job.id, chunk.index, timingMethod, chunk.sha256, JSON.stringify(segment)),
-        }, job.asrProfile, job.audioFormat, value => saveDecode.run(JSON.stringify(value), job.id), transcribeSegment, report);
+        }, job.asrProfile, job.audioFormat, value => saveDecode.run(JSON.stringify(value), job.id), transcribeSegment, report, concurrency);
         if (shutdown.signal.aborted) return;
         report({ stage: 'finalizing', currentChunk: null });
         const ledger = extract(segments);

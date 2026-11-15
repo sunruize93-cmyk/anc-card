@@ -1,0 +1,1909 @@
+{
+  "results": {
+    "schema": "anc-asr-parallel-benchmark-v1",
+    "createdAt": "2026-11-15T03:02:08.603Z",
+    "model": "qwen3-asr-flash",
+    "sampleKind": "macOS TTS; no real-meeting accuracy claim",
+    "orders": [
+      [
+        1,
+        2,
+        4
+      ],
+      [
+        2,
+        4,
+        1
+      ],
+      [
+        4,
+        1,
+        2
+      ]
+    ],
+    "manifest": [
+      {
+        "id": "assignment",
+        "sha256": "1d2a09a9c9de31b575c03472b44b263e875d67f44483f02a257036dcc823da9d",
+        "bytes": 1261374,
+        "durationMs": 39416.5625,
+        "chunks": [
+          {
+            "index": 0,
+            "startMs": 0,
+            "endMs": 9640,
+            "sha256": "45bc91a02fc6f5b703f82011dd37025a134c3f568c918906595e32b9c82615e6"
+          },
+          {
+            "index": 1,
+            "startMs": 9640,
+            "endMs": 18480,
+            "sha256": "57f9f8b7f9b289544f96827968e3d5d94c27d46aae033ff2151b77be81c815d2"
+          },
+          {
+            "index": 2,
+            "startMs": 18480,
+            "endMs": 28400,
+            "sha256": "e3f076820d57b734f7a0ad3f7f7dad9da4136c4f6d77db036f9afa944a1ae319"
+          },
+          {
+            "index": 3,
+            "startMs": 28400,
+            "endMs": 39080,
+            "sha256": "880fa273e6fcdc7523194cf4973850da1270a6643c182b831f8699d1589cb009"
+          }
+        ],
+        "reference": "今天讨论录音系统的下一步安排。测试环境已经准备好，今天只做测试，不发布正式版本。由陈明负责整理会议纪要。截止时间是本周五。纪要需要保留负责人和原音时间。由林芳负责更新使用说明。截止时间是下周一。文档需要写清楚上传失败后的重试方法。请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。"
+      },
+      {
+        "id": "numbers",
+        "sha256": "d55b0cd7cd171389e0a2d7853482f9e5fb88a49dacbb68b0e866a3001fdbed7d",
+        "bytes": 1230728,
+        "durationMs": 38458.875,
+        "chunks": [
+          {
+            "index": 0,
+            "startMs": 0,
+            "endMs": 9520,
+            "sha256": "a7fdaeabcb1d40c8a09c24a36b9d70822348c5ade3fca0f65dcf318f61cc45f2"
+          },
+          {
+            "index": 1,
+            "startMs": 9520,
+            "endMs": 18520,
+            "sha256": "2718889d4c190dbe4d14173e1112e8cc8b774206b3d67f6bd859c136eb38c3e8"
+          },
+          {
+            "index": 2,
+            "startMs": 18520,
+            "endMs": 27760,
+            "sha256": "9c5452a74be0a9383323ab75b73fd8f31a10ed6cacce8f5585df7c21d4668442"
+          },
+          {
+            "index": 3,
+            "startMs": 27760,
+            "endMs": 38120,
+            "sha256": "d5ccda7a5867abe7bcbce53804d9ad1012a9106ae0d74528229118c7c089b48d"
+          }
+        ],
+        "reference": "这是一段预算和日期测试。试用人数是五个人，每个人每天录音一次，每次大约两个小时。本月预算上限是三千五百元。第一笔支出是一千二百元，第二笔支出是八百元。会议定在十一月二十日，下午三点半开始。请不要把下午三点半写成上午三点半。录音需要保留原件和时间点。费用只是测试数据，不代表已经批准付款，也不要自动发送账单。"
+      },
+      {
+        "id": "correction",
+        "sha256": "509dfc5ac0ceb2041d04a58f67f3d776f9eadd93abcd7748c474dd17e59755ca",
+        "bytes": 1239358,
+        "durationMs": 38728.5625,
+        "chunks": [
+          {
+            "index": 0,
+            "startMs": 0,
+            "endMs": 9080,
+            "sha256": "929662e5b1b57b07de84bcbc8569a7658dfb460f5337f42766d868fca148a445"
+          },
+          {
+            "index": 1,
+            "startMs": 9080,
+            "endMs": 17900,
+            "sha256": "a57ee630c43d309bb0a2c588a7baa4d9f49a7b7cfdbd1221fbbe10648eca201f"
+          },
+          {
+            "index": 2,
+            "startMs": 17900,
+            "endMs": 27880,
+            "sha256": "ac83bde3960d609f0374cf75b5d6435d5148c1406c046af10f2f5034aeea7edd"
+          },
+          {
+            "index": 3,
+            "startMs": 27880,
+            "endMs": 38400,
+            "sha256": "d12c05e78adafae105ae03f784d91e28a43e3a066ff3793d663cf3557e20ebf9"
+          }
+        ],
+        "reference": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。等一下，刚才的安排需要修改。改由林芳负责联系客户，截止时间改为下周一。还有一个重要变化。先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。会议最后确认，旧安排已经撤回。没有经过确认的任务不要执行，不能把最早的提议当作最终决定。"
+      }
+    ],
+    "runs": [
+      {
+        "round": 1,
+        "concurrency": 1,
+        "sample": "assignment",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 17505.78975,
+        "peak": 1,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 142,
+        "cer": 0.007042253521126761,
+        "checks": [
+          {
+            "label": "陈明负责会议纪要",
+            "passed": true
+          },
+          {
+            "label": "本周五截止",
+            "passed": true
+          },
+          {
+            "label": "林芳负责使用说明",
+            "passed": true
+          },
+          {
+            "label": "下周一截止",
+            "passed": true
+          },
+          {
+            "label": "不要提前宣布完成",
+            "passed": true
+          }
+        ],
+        "transcript": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 5695.812792000001,
+            "attempts": 1,
+            "text": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 2664.3035420000006,
+            "attempts": 1,
+            "text": "由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 4206.07675,
+            "attempts": 1,
+            "text": "由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 4901.948083000001,
+            "attempts": 1,
+            "text": "请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。"
+          }
+        ]
+      },
+      {
+        "round": 1,
+        "concurrency": 1,
+        "sample": "numbers",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 14319.979082999998,
+        "peak": 1,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 0,
+        "referenceCharacters": 139,
+        "cer": 0,
+        "checks": [
+          {
+            "label": "预算3500",
+            "passed": true
+          },
+          {
+            "label": "第一笔1200",
+            "passed": true
+          },
+          {
+            "label": "第二笔800",
+            "passed": true
+          },
+          {
+            "label": "日期11月20日",
+            "passed": true
+          },
+          {
+            "label": "未批准付款",
+            "passed": true
+          }
+        ],
+        "transcript": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 5366.758000000002,
+            "attempts": 1,
+            "text": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 1043.252583999998,
+            "attempts": 1,
+            "text": "本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 5353.7277079999985,
+            "attempts": 1,
+            "text": "会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 2518.7226249999985,
+            "attempts": 1,
+            "text": "录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。"
+          }
+        ]
+      },
+      {
+        "round": 1,
+        "concurrency": 1,
+        "sample": "correction",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 18012.983792000003,
+        "peak": 1,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 140,
+        "cer": 0.007142857142857143,
+        "checks": [
+          {
+            "label": "最初陈明安排",
+            "passed": true
+          },
+          {
+            "label": "改派林芳",
+            "passed": true
+          },
+          {
+            "label": "新截止下周一",
+            "passed": true
+          },
+          {
+            "label": "取消客户邮件",
+            "passed": true
+          },
+          {
+            "label": "旧安排撤回",
+            "passed": false
+          }
+        ],
+        "transcript": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 4542.711458000002,
+            "attempts": 1,
+            "text": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 3435.740334000002,
+            "attempts": 1,
+            "text": "等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 3353.0736249999973,
+            "attempts": 1,
+            "text": "还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 6632.856791999999,
+            "attempts": 1,
+            "text": "会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。"
+          }
+        ]
+      },
+      {
+        "round": 1,
+        "concurrency": 2,
+        "sample": "assignment",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 6765.430458000003,
+        "peak": 2,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 142,
+        "cer": 0.007042253521126761,
+        "checks": [
+          {
+            "label": "陈明负责会议纪要",
+            "passed": true
+          },
+          {
+            "label": "本周五截止",
+            "passed": true
+          },
+          {
+            "label": "林芳负责使用说明",
+            "passed": true
+          },
+          {
+            "label": "下周一截止",
+            "passed": true
+          },
+          {
+            "label": "不要提前宣布完成",
+            "passed": true
+          }
+        ],
+        "transcript": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 2433.8286660000012,
+            "attempts": 1,
+            "text": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 1898.9709589999984,
+            "attempts": 1,
+            "text": "由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 3361.4622919999965,
+            "attempts": 1,
+            "text": "由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 4283.890541000001,
+            "attempts": 1,
+            "text": "请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。"
+          }
+        ]
+      },
+      {
+        "round": 1,
+        "concurrency": 2,
+        "sample": "numbers",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 5487.010583000003,
+        "peak": 2,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 0,
+        "referenceCharacters": 139,
+        "cer": 0,
+        "checks": [
+          {
+            "label": "预算3500",
+            "passed": true
+          },
+          {
+            "label": "第一笔1200",
+            "passed": true
+          },
+          {
+            "label": "第二笔800",
+            "passed": true
+          },
+          {
+            "label": "日期11月20日",
+            "passed": true
+          },
+          {
+            "label": "未批准付款",
+            "passed": true
+          }
+        ],
+        "transcript": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 962.244375000002,
+            "attempts": 1,
+            "text": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 3985.270083000003,
+            "attempts": 1,
+            "text": "本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 1198.6454589999994,
+            "attempts": 1,
+            "text": "会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 3290.626916000001,
+            "attempts": 1,
+            "text": "录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。"
+          }
+        ]
+      },
+      {
+        "round": 1,
+        "concurrency": 2,
+        "sample": "correction",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 8720.890209000005,
+        "peak": 2,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 140,
+        "cer": 0.007142857142857143,
+        "checks": [
+          {
+            "label": "最初陈明安排",
+            "passed": true
+          },
+          {
+            "label": "改派林芳",
+            "passed": true
+          },
+          {
+            "label": "新截止下周一",
+            "passed": true
+          },
+          {
+            "label": "取消客户邮件",
+            "passed": true
+          },
+          {
+            "label": "旧安排撤回",
+            "passed": false
+          }
+        ],
+        "transcript": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 2714.724209,
+            "attempts": 1,
+            "text": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 3518.818333000003,
+            "attempts": 1,
+            "text": "等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 2905.7938749999958,
+            "attempts": 1,
+            "text": "还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 5152.759416000001,
+            "attempts": 1,
+            "text": "会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。"
+          }
+        ]
+      },
+      {
+        "round": 1,
+        "concurrency": 4,
+        "sample": "assignment",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 5264.99725,
+        "peak": 4,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 142,
+        "cer": 0.007042253521126761,
+        "checks": [
+          {
+            "label": "陈明负责会议纪要",
+            "passed": true
+          },
+          {
+            "label": "本周五截止",
+            "passed": true
+          },
+          {
+            "label": "林芳负责使用说明",
+            "passed": true
+          },
+          {
+            "label": "下周一截止",
+            "passed": true
+          },
+          {
+            "label": "不要提前宣布完成",
+            "passed": true
+          }
+        ],
+        "transcript": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 4448.183416,
+            "attempts": 1,
+            "text": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 4117.731375000003,
+            "attempts": 1,
+            "text": "由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 2889.054541000005,
+            "attempts": 1,
+            "text": "由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 5220.378250000009,
+            "attempts": 1,
+            "text": "请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。"
+          }
+        ]
+      },
+      {
+        "round": 1,
+        "concurrency": 4,
+        "sample": "numbers",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 4894.409792000006,
+        "peak": 4,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 0,
+        "referenceCharacters": 139,
+        "cer": 0,
+        "checks": [
+          {
+            "label": "预算3500",
+            "passed": true
+          },
+          {
+            "label": "第一笔1200",
+            "passed": true
+          },
+          {
+            "label": "第二笔800",
+            "passed": true
+          },
+          {
+            "label": "日期11月20日",
+            "passed": true
+          },
+          {
+            "label": "未批准付款",
+            "passed": true
+          }
+        ],
+        "transcript": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 4422.309500000003,
+            "attempts": 1,
+            "text": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 2974.6960830000025,
+            "attempts": 1,
+            "text": "本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 4856.358667000008,
+            "attempts": 1,
+            "text": "会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 4164.226834000001,
+            "attempts": 1,
+            "text": "录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。"
+          }
+        ]
+      },
+      {
+        "round": 1,
+        "concurrency": 4,
+        "sample": "correction",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 5034.85145799999,
+        "peak": 4,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 140,
+        "cer": 0.007142857142857143,
+        "checks": [
+          {
+            "label": "最初陈明安排",
+            "passed": true
+          },
+          {
+            "label": "改派林芳",
+            "passed": true
+          },
+          {
+            "label": "新截止下周一",
+            "passed": true
+          },
+          {
+            "label": "取消客户邮件",
+            "passed": true
+          },
+          {
+            "label": "旧安排撤回",
+            "passed": false
+          }
+        ],
+        "transcript": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 1315.812082999997,
+            "attempts": 1,
+            "text": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 3714.5241249999963,
+            "attempts": 1,
+            "text": "等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 4989.732292000001,
+            "attempts": 1,
+            "text": "还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 4573.316332999995,
+            "attempts": 1,
+            "text": "会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。"
+          }
+        ]
+      },
+      {
+        "round": 2,
+        "concurrency": 2,
+        "sample": "numbers",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 9233.626375000007,
+        "peak": 2,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 0,
+        "referenceCharacters": 139,
+        "cer": 0,
+        "checks": [
+          {
+            "label": "预算3500",
+            "passed": true
+          },
+          {
+            "label": "第一笔1200",
+            "passed": true
+          },
+          {
+            "label": "第二笔800",
+            "passed": true
+          },
+          {
+            "label": "日期11月20日",
+            "passed": true
+          },
+          {
+            "label": "未批准付款",
+            "passed": true
+          }
+        ],
+        "transcript": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 4725.246958000003,
+            "attempts": 1,
+            "text": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 2786.854707999999,
+            "attempts": 1,
+            "text": "本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 4371.979042000006,
+            "attempts": 1,
+            "text": "会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 4475.405375000002,
+            "attempts": 1,
+            "text": "录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。"
+          }
+        ]
+      },
+      {
+        "round": 2,
+        "concurrency": 2,
+        "sample": "correction",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 9460.519375000003,
+        "peak": 2,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 140,
+        "cer": 0.007142857142857143,
+        "checks": [
+          {
+            "label": "最初陈明安排",
+            "passed": true
+          },
+          {
+            "label": "改派林芳",
+            "passed": true
+          },
+          {
+            "label": "新截止下周一",
+            "passed": true
+          },
+          {
+            "label": "取消客户邮件",
+            "passed": true
+          },
+          {
+            "label": "旧安排撤回",
+            "passed": false
+          }
+        ],
+        "transcript": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 3936.077040999997,
+            "attempts": 1,
+            "text": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 4733.025874999992,
+            "attempts": 1,
+            "text": "等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 5482.648291999998,
+            "attempts": 1,
+            "text": "还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 3797.982415999999,
+            "attempts": 1,
+            "text": "会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。"
+          }
+        ]
+      },
+      {
+        "round": 2,
+        "concurrency": 2,
+        "sample": "assignment",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 11983.717000000004,
+        "peak": 2,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 142,
+        "cer": 0.007042253521126761,
+        "checks": [
+          {
+            "label": "陈明负责会议纪要",
+            "passed": true
+          },
+          {
+            "label": "本周五截止",
+            "passed": true
+          },
+          {
+            "label": "林芳负责使用说明",
+            "passed": true
+          },
+          {
+            "label": "下周一截止",
+            "passed": true
+          },
+          {
+            "label": "不要提前宣布完成",
+            "passed": true
+          }
+        ],
+        "transcript": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 6729.147582999998,
+            "attempts": 1,
+            "text": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 3758.922417000009,
+            "attempts": 1,
+            "text": "由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 3997.4161250000034,
+            "attempts": 1,
+            "text": "由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 5224.212292000011,
+            "attempts": 1,
+            "text": "请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。"
+          }
+        ]
+      },
+      {
+        "round": 2,
+        "concurrency": 4,
+        "sample": "numbers",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 4804.303708000007,
+        "peak": 4,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 0,
+        "referenceCharacters": 139,
+        "cer": 0,
+        "checks": [
+          {
+            "label": "预算3500",
+            "passed": true
+          },
+          {
+            "label": "第一笔1200",
+            "passed": true
+          },
+          {
+            "label": "第二笔800",
+            "passed": true
+          },
+          {
+            "label": "日期11月20日",
+            "passed": true
+          },
+          {
+            "label": "未批准付款",
+            "passed": true
+          }
+        ],
+        "transcript": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 3796.058541999999,
+            "attempts": 1,
+            "text": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 2880.228833000001,
+            "attempts": 1,
+            "text": "本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 1602.526582999999,
+            "attempts": 1,
+            "text": "会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 4771.384957999995,
+            "attempts": 1,
+            "text": "录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。"
+          }
+        ]
+      },
+      {
+        "round": 2,
+        "concurrency": 4,
+        "sample": "correction",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 5755.000207999998,
+        "peak": 4,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 140,
+        "cer": 0.007142857142857143,
+        "checks": [
+          {
+            "label": "最初陈明安排",
+            "passed": true
+          },
+          {
+            "label": "改派林芳",
+            "passed": true
+          },
+          {
+            "label": "新截止下周一",
+            "passed": true
+          },
+          {
+            "label": "取消客户邮件",
+            "passed": true
+          },
+          {
+            "label": "旧安排撤回",
+            "passed": false
+          }
+        ],
+        "transcript": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 2729.9725409999955,
+            "attempts": 1,
+            "text": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 2495.418333999987,
+            "attempts": 1,
+            "text": "等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 5460.267833000005,
+            "attempts": 1,
+            "text": "还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 5719.0297500000015,
+            "attempts": 1,
+            "text": "会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。"
+          }
+        ]
+      },
+      {
+        "round": 2,
+        "concurrency": 4,
+        "sample": "assignment",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 4638.192207999993,
+        "peak": 4,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 142,
+        "cer": 0.007042253521126761,
+        "checks": [
+          {
+            "label": "陈明负责会议纪要",
+            "passed": true
+          },
+          {
+            "label": "本周五截止",
+            "passed": true
+          },
+          {
+            "label": "林芳负责使用说明",
+            "passed": true
+          },
+          {
+            "label": "下周一截止",
+            "passed": true
+          },
+          {
+            "label": "不要提前宣布完成",
+            "passed": true
+          }
+        ],
+        "transcript": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 3718.5229160000017,
+            "attempts": 1,
+            "text": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 1066.3595829999977,
+            "attempts": 1,
+            "text": "由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 4196.0652080000145,
+            "attempts": 1,
+            "text": "由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 4597.679709000004,
+            "attempts": 1,
+            "text": "请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。"
+          }
+        ]
+      },
+      {
+        "round": 2,
+        "concurrency": 1,
+        "sample": "numbers",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 15932.782500000001,
+        "peak": 1,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 0,
+        "referenceCharacters": 139,
+        "cer": 0,
+        "checks": [
+          {
+            "label": "预算3500",
+            "passed": true
+          },
+          {
+            "label": "第一笔1200",
+            "passed": true
+          },
+          {
+            "label": "第二笔800",
+            "passed": true
+          },
+          {
+            "label": "日期11月20日",
+            "passed": true
+          },
+          {
+            "label": "未批准付款",
+            "passed": true
+          }
+        ],
+        "transcript": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 3801.927416999999,
+            "attempts": 1,
+            "text": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 2498.2116249999963,
+            "attempts": 1,
+            "text": "本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 3399.511333000002,
+            "attempts": 1,
+            "text": "会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 6199.5742080000055,
+            "attempts": 1,
+            "text": "录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。"
+          }
+        ]
+      },
+      {
+        "round": 2,
+        "concurrency": 1,
+        "sample": "correction",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 18569.485082999978,
+        "peak": 1,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 140,
+        "cer": 0.007142857142857143,
+        "checks": [
+          {
+            "label": "最初陈明安排",
+            "passed": true
+          },
+          {
+            "label": "改派林芳",
+            "passed": true
+          },
+          {
+            "label": "新截止下周一",
+            "passed": true
+          },
+          {
+            "label": "取消客户邮件",
+            "passed": true
+          },
+          {
+            "label": "旧安排撤回",
+            "passed": false
+          }
+        ],
+        "transcript": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 2969.2859159999934,
+            "attempts": 1,
+            "text": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 4934.198415999999,
+            "attempts": 1,
+            "text": "等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 4182.3868749999965,
+            "attempts": 1,
+            "text": "还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 6417.20541699999,
+            "attempts": 1,
+            "text": "会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。"
+          }
+        ]
+      },
+      {
+        "round": 2,
+        "concurrency": 1,
+        "sample": "assignment",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 10711.740374999994,
+        "peak": 1,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 142,
+        "cer": 0.007042253521126761,
+        "checks": [
+          {
+            "label": "陈明负责会议纪要",
+            "passed": true
+          },
+          {
+            "label": "本周五截止",
+            "passed": true
+          },
+          {
+            "label": "林芳负责使用说明",
+            "passed": true
+          },
+          {
+            "label": "下周一截止",
+            "passed": true
+          },
+          {
+            "label": "不要提前宣布完成",
+            "passed": true
+          }
+        ],
+        "transcript": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 2289.8415830000013,
+            "attempts": 1,
+            "text": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 2496.9388749999925,
+            "attempts": 1,
+            "text": "由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 4687.572374999989,
+            "attempts": 1,
+            "text": "由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 1192.8392079999903,
+            "attempts": 1,
+            "text": "请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。"
+          }
+        ]
+      },
+      {
+        "round": 3,
+        "concurrency": 4,
+        "sample": "correction",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 5671.309750000015,
+        "peak": 4,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 140,
+        "cer": 0.007142857142857143,
+        "checks": [
+          {
+            "label": "最初陈明安排",
+            "passed": true
+          },
+          {
+            "label": "改派林芳",
+            "passed": true
+          },
+          {
+            "label": "新截止下周一",
+            "passed": true
+          },
+          {
+            "label": "取消客户邮件",
+            "passed": true
+          },
+          {
+            "label": "旧安排撤回",
+            "passed": false
+          }
+        ],
+        "transcript": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 5643.606417000003,
+            "attempts": 1,
+            "text": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 3927.82925000001,
+            "attempts": 1,
+            "text": "等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 2438.9711670000106,
+            "attempts": 1,
+            "text": "还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 1664.9877090000082,
+            "attempts": 1,
+            "text": "会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。"
+          }
+        ]
+      },
+      {
+        "round": 3,
+        "concurrency": 4,
+        "sample": "assignment",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 5203.164957999979,
+        "peak": 4,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 142,
+        "cer": 0.007042253521126761,
+        "checks": [
+          {
+            "label": "陈明负责会议纪要",
+            "passed": true
+          },
+          {
+            "label": "本周五截止",
+            "passed": true
+          },
+          {
+            "label": "林芳负责使用说明",
+            "passed": true
+          },
+          {
+            "label": "下周一截止",
+            "passed": true
+          },
+          {
+            "label": "不要提前宣布完成",
+            "passed": true
+          }
+        ],
+        "transcript": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 951.5057920000108,
+            "attempts": 1,
+            "text": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 3591.2065000000002,
+            "attempts": 1,
+            "text": "由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 5164.236750000011,
+            "attempts": 1,
+            "text": "由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 1025.9067499999946,
+            "attempts": 1,
+            "text": "请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。"
+          }
+        ]
+      },
+      {
+        "round": 3,
+        "concurrency": 4,
+        "sample": "numbers",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 5312.7573749999865,
+        "peak": 4,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 0,
+        "referenceCharacters": 139,
+        "cer": 0,
+        "checks": [
+          {
+            "label": "预算3500",
+            "passed": true
+          },
+          {
+            "label": "第一笔1200",
+            "passed": true
+          },
+          {
+            "label": "第二笔800",
+            "passed": true
+          },
+          {
+            "label": "日期11月20日",
+            "passed": true
+          },
+          {
+            "label": "未批准付款",
+            "passed": true
+          }
+        ],
+        "transcript": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 5270.414707999997,
+            "attempts": 1,
+            "text": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 5008.166083999997,
+            "attempts": 1,
+            "text": "本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 3905.0411669999885,
+            "attempts": 1,
+            "text": "会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 4651.817416999984,
+            "attempts": 1,
+            "text": "录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。"
+          }
+        ]
+      },
+      {
+        "round": 3,
+        "concurrency": 1,
+        "sample": "correction",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 15766.761832999997,
+        "peak": 1,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 140,
+        "cer": 0.007142857142857143,
+        "checks": [
+          {
+            "label": "最初陈明安排",
+            "passed": true
+          },
+          {
+            "label": "改派林芳",
+            "passed": true
+          },
+          {
+            "label": "新截止下周一",
+            "passed": true
+          },
+          {
+            "label": "取消客户邮件",
+            "passed": true
+          },
+          {
+            "label": "旧安排撤回",
+            "passed": false
+          }
+        ],
+        "transcript": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 2510.545041000005,
+            "attempts": 1,
+            "text": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 5253.425125000009,
+            "attempts": 1,
+            "text": "等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 3686.1351670000004,
+            "attempts": 1,
+            "text": "还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 4282.8812920000055,
+            "attempts": 1,
+            "text": "会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。"
+          }
+        ]
+      },
+      {
+        "round": 3,
+        "concurrency": 1,
+        "sample": "assignment",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 13904.981709000014,
+        "peak": 1,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 142,
+        "cer": 0.007042253521126761,
+        "checks": [
+          {
+            "label": "陈明负责会议纪要",
+            "passed": true
+          },
+          {
+            "label": "本周五截止",
+            "passed": true
+          },
+          {
+            "label": "林芳负责使用说明",
+            "passed": true
+          },
+          {
+            "label": "下周一截止",
+            "passed": true
+          },
+          {
+            "label": "不要提前宣布完成",
+            "passed": true
+          }
+        ],
+        "transcript": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 3171.6566250000033,
+            "attempts": 1,
+            "text": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 1222.7093330000062,
+            "attempts": 1,
+            "text": "由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 4915.670082999975,
+            "attempts": 1,
+            "text": "由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 4549.332290999999,
+            "attempts": 1,
+            "text": "请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。"
+          }
+        ]
+      },
+      {
+        "round": 3,
+        "concurrency": 1,
+        "sample": "numbers",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 13501.489957999991,
+        "peak": 1,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 0,
+        "referenceCharacters": 139,
+        "cer": 0,
+        "checks": [
+          {
+            "label": "预算3500",
+            "passed": true
+          },
+          {
+            "label": "第一笔1200",
+            "passed": true
+          },
+          {
+            "label": "第二笔800",
+            "passed": true
+          },
+          {
+            "label": "日期11月20日",
+            "passed": true
+          },
+          {
+            "label": "未批准付款",
+            "passed": true
+          }
+        ],
+        "transcript": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 2448.5146250000107,
+            "attempts": 1,
+            "text": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 5022.554292000015,
+            "attempts": 1,
+            "text": "本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 3881.0121250000084,
+            "attempts": 1,
+            "text": "会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 2110.0167920000094,
+            "attempts": 1,
+            "text": "录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。"
+          }
+        ]
+      },
+      {
+        "round": 3,
+        "concurrency": 2,
+        "sample": "correction",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 7057.410415999999,
+        "peak": 2,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 140,
+        "cer": 0.007142857142857143,
+        "checks": [
+          {
+            "label": "最初陈明安排",
+            "passed": true
+          },
+          {
+            "label": "改派林芳",
+            "passed": true
+          },
+          {
+            "label": "新截止下周一",
+            "passed": true
+          },
+          {
+            "label": "取消客户邮件",
+            "passed": true
+          },
+          {
+            "label": "旧安排撤回",
+            "passed": false
+          }
+        ],
+        "transcript": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 3496.9202919999952,
+            "attempts": 1,
+            "text": "先安排由陈明负责联系客户，计划本周五发邮件。这里先记录讨论，不要立即发送。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 4145.913583000016,
+            "attempts": 1,
+            "text": "等一下，刚才的安排需要修改，改由林芳负责联系客户，截止时间改为下周一。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 3520.4082500000077,
+            "attempts": 1,
+            "text": "还有一个重要变化，先取消发送客户邮件，只整理一份内部草稿，等负责人确认后再决定。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 1484.5837919999904,
+            "attempts": 1,
+            "text": "会议最后确认，就安排已经撤回，没有经过确认的任务不要执行，不能把最早的提议当作最终决定。"
+          }
+        ]
+      },
+      {
+        "round": 3,
+        "concurrency": 2,
+        "sample": "assignment",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 8255.457792000001,
+        "peak": 2,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 1,
+        "referenceCharacters": 142,
+        "cer": 0.007042253521126761,
+        "checks": [
+          {
+            "label": "陈明负责会议纪要",
+            "passed": true
+          },
+          {
+            "label": "本周五截止",
+            "passed": true
+          },
+          {
+            "label": "林芳负责使用说明",
+            "passed": true
+          },
+          {
+            "label": "下周一截止",
+            "passed": true
+          },
+          {
+            "label": "不要提前宣布完成",
+            "passed": true
+          }
+        ],
+        "transcript": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 4586.133417000005,
+            "attempts": 1,
+            "text": "今天讨论录音系统的下一步安排，测试环境已经准备好，今天只做测试，不发布正式版本。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 4413.947832999984,
+            "attempts": 1,
+            "text": "由陈明负责整理会议纪要，截止时间是本周五，纪要需要保留负责人和原因时间。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 3080.836541000026,
+            "attempts": 1,
+            "text": "由林芳负责更新使用说明，截止时间是下周一，文档需要写清楚上传失败后的重试方法。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 3631.2848330000124,
+            "attempts": 1,
+            "text": "请先让两位同事试用，再收集反馈。完成以后再讨论是否扩大到五个人，不要提前宣布完成。"
+          }
+        ]
+      },
+      {
+        "round": 3,
+        "concurrency": 2,
+        "sample": "numbers",
+        "status": "complete",
+        "error": null,
+        "elapsedMs": 9620.93862500001,
+        "peak": 2,
+        "cacheReused": 0,
+        "timingMatches": true,
+        "edits": 0,
+        "referenceCharacters": 139,
+        "cer": 0,
+        "checks": [
+          {
+            "label": "预算3500",
+            "passed": true
+          },
+          {
+            "label": "第一笔1200",
+            "passed": true
+          },
+          {
+            "label": "第二笔800",
+            "passed": true
+          },
+          {
+            "label": "日期11月20日",
+            "passed": true
+          },
+          {
+            "label": "未批准付款",
+            "passed": true
+          }
+        ],
+        "transcript": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。",
+        "observations": [
+          {
+            "index": 0,
+            "elapsedMs": 5448.040290999983,
+            "attempts": 1,
+            "text": "这是一段预算和日期测试，试用人数是五个人，每个人每天录音一次，每次大约两个小时。"
+          },
+          {
+            "index": 1,
+            "elapsedMs": 4656.187665999983,
+            "attempts": 1,
+            "text": "本月预算上限是三千五百元，第一笔支出是一千二百元，第二笔支出是八百元。"
+          },
+          {
+            "index": 2,
+            "elapsedMs": 3804.2098750000005,
+            "attempts": 1,
+            "text": "会议定在十一月二十日下午三点半开始，请不要把下午三点半写成上午三点半。"
+          },
+          {
+            "index": 3,
+            "elapsedMs": 4143.938750000001,
+            "attempts": 1,
+            "text": "录音需要保留原件和时间点，费用只是测试数据，不代表已经批准付款，也不要自动发送账单。"
+          }
+        ]
+      }
+    ]
+  },
+  "summary": {
+    "sampleCount": 3,
+    "audioSeconds": 116.60400000000001,
+    "repeats": 3,
+    "limitations": "TTS, one provider/account/network, short recordings, text/key-check metrics are not human semantic accuracy",
+    "rows": [
+      {
+        "concurrency": 1,
+        "roundSeconds": [
+          49.838752625,
+          45.21400795799997,
+          43.1732335
+        ],
+        "medianBatchSeconds": 45.21400795799997,
+        "characterErrorRate": 0.004750593824228029,
+        "keyChecksPassed": 42,
+        "keyChecksTotal": 45,
+        "calls": 36,
+        "attempts": 36,
+        "peak": 1,
+        "timingMatches": true,
+        "speedup": 1
+      },
+      {
+        "concurrency": 2,
+        "roundSeconds": [
+          20.973331250000008,
+          30.677862750000017,
+          24.933806833000013
+        ],
+        "medianBatchSeconds": 24.933806833000013,
+        "characterErrorRate": 0.004750593824228029,
+        "keyChecksPassed": 42,
+        "keyChecksTotal": 45,
+        "calls": 36,
+        "attempts": 36,
+        "peak": 2,
+        "timingMatches": true,
+        "speedup": 1.8133616042199787
+      },
+      {
+        "concurrency": 4,
+        "roundSeconds": [
+          15.194258499999995,
+          15.197496123999997,
+          16.18723208299998
+        ],
+        "medianBatchSeconds": 15.197496123999997,
+        "characterErrorRate": 0.004750593824228029,
+        "keyChecksPassed": 42,
+        "keyChecksTotal": 45,
+        "calls": 36,
+        "attempts": 36,
+        "peak": 4,
+        "timingMatches": true,
+        "speedup": 2.9750958703386456
+      }
+    ]
+  },
+  "manualReview": {
+    "fullTextsIdenticalAcrossAllNineRunsPerSample": true,
+    "observedSubstitutions": [
+      {
+        "sample": "assignment",
+        "reference": "原音时间",
+        "recognized": "原因时间"
+      },
+      {
+        "sample": "correction",
+        "reference": "旧安排已经撤回",
+        "recognized": "就安排已经撤回"
+      }
+    ],
+    "limitations": [
+      "Three clean Mandarin TTS samples, not real meetings",
+      "No transfer, Feishu or summary latency included",
+      "Three repeated runs are not independent new speech samples",
+      "Cloud requests all succeeded; failure/cancellation validation used isolated fixtures"
+    ]
+  }
+}
