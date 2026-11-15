@@ -60,6 +60,10 @@ test('one-hour 115 MB WAV: HTTP ingestion, durable retry, original offsets, dedu
       'X-Recording-ID':'hour-1','X-Content-SHA256':id,'X-ANC-Filename':'one-hour.wav'},body:wav});
     let response=await upload(); assert.equal(response.status,201);assert.equal((await response.json()).recordingId,id);
     await until(()=>recordings.get(id).status==='failed');
+    const failed=recordings.get(id);
+    assert.equal(failed.progress.totalChunks,120);assert.equal(failed.progress.completedChunks,37);
+    assert.equal(failed.progress.currentChunk.startMs,1110000);
+    assert.match(failed.progressText,/第 38 段（原音 18:30–19:00）失败/);
     assert.equal(recordings.info(id).size,115200044);
     assert.equal(sha(recordings.readAudio(id,0,wav.length)),id);
     const sent=[],patched=[];
@@ -69,8 +73,11 @@ test('one-hour 115 MB WAV: HTTP ingestion, durable retry, original offsets, dedu
     await sync();assert.equal(sent.length,1);
     await recordings.close();recordings=null;
     fail=false;recordings=await openRecordings(dir,{transcribeSegment:recognize});
+    assert.deepEqual(recordings.get(id).progress,failed.progress);
     recordings.retry(id);await until(()=>recordings.get(id).status==='complete');
     const completed=recordings.get(id);
+    assert.equal(completed.progress.completedChunks,120);assert.equal(completed.progress.reusedChunks,37);
+    assert.equal(completed.progress.stage,'complete');assert.equal(completed.progress.currentChunk,null);
     assert.equal(completed.transcript.length,120);
     completed.transcript.forEach((s,i)=>{assert.equal(s.startMs,i*30000);assert.equal(s.endMs,(i+1)*30000);});
     assert.equal(completed.ledger.length,1);assert.equal(completed.ledger[0].startMs,3570000);
@@ -100,6 +107,9 @@ test('one-hour 115 MB WAV: HTTP ingestion, durable retry, original offsets, dedu
       if(await fetch(base+'/api/recordings').then(r=>r.ok).catch(()=>false))break;
       if(n===199)throw Error('isolated main failed to start');await delay(20);
     }
+    const readiness=await (await fetch(base+'/api/readiness')).json();assert.equal(readiness.maxAudioBytes,maxAudioBytes);
+    const deliveryState=await (await fetch(base+'/api/recordings/'+id+'/delivery')).json();
+    assert.equal(deliveryState.progress.completedChunks,120);assert.match(deliveryState.progressText,/120\/120/);
     response=await fetch(base+'/api/recordings',{method:'POST',headers:{'X-ANC-Filename':'hour-http.wav'},body:wav});
     assert.equal(response.status,200);const receipt=await response.json();
     assert.equal(receipt.recording.id,id);assert.equal(receipt.duplicate,true);assert.equal(receipt.recording.status,'complete');

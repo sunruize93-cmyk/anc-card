@@ -519,8 +519,8 @@ final class RelayModel: ObservableObject {
                 catch { failDownload("无法保存下载文件名", attention: true); return }
             case .append(let data):
                 guard let output = output else { failDownload("下载临时文件未打开", attention: true); return }
-                guard writtenBytes + data.count <= 64 * 1024 * 1024 else {
-                    abortDownload(); failDownload("文件超过当前后台 64 MiB 限制，临时文件保留", attention: true); return
+                guard AudioTransferLimits.canAppend(received: writtenBytes, next: data.count) else {
+                    abortDownload(); failDownload("文件超过 256 MiB 限制，临时文件保留", attention: true); return
                 }
                 do {
                     try output.write(contentsOf: data); writtenBytes += data.count

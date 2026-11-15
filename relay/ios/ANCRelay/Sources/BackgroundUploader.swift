@@ -323,7 +323,7 @@ final class BackgroundUploader: NSObject, URLSessionDataDelegate, URLSessionTask
                                 $0.delivery = result
                                 if $0.documentVerification?.matches(result.document) != true { $0.documentVerification = nil; $0.documentAllowsCleanup = nil }
                                 $0.documentMessage = result.document == nil ? "结构化文档：后台尚未提供，原音保留" : "结构化文档：等待回读核对"
-                                $0.message = result.complete ? "转写完成 · 飞书结果卡已就绪" : "后台：\(result.status) · 飞书：\(result.feishu.state)"
+                                $0.message = result.complete ? "转写完成 · 飞书结果卡已就绪" : (result.progressText ?? "后台：\(result.status) · 飞书：\(result.feishu.state)")
                                 if result.error != nil || result.feishu.error != nil { $0.message = "后台或飞书处理失败，保留回执等待核查" }
                             }
                             self.queryAfter[record.id] = Date().addingTimeInterval(result.complete ? 30 : 5)

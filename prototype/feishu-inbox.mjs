@@ -1,3 +1,4 @@
+import { describeProgress } from './recording-progress.mjs';
 import { createHash, randomUUID } from 'node:crypto';
 import { extname } from 'node:path';
 
@@ -89,6 +90,8 @@ export function recordingCard(row, recording) {
   const status = row.inputError ? '导入未完成' : states[recording?.status];
   const text = content => ({ tag: 'div', text: { tag: 'plain_text', content } });
   const elements = [text(`${row.name}\n${status}\n转写服务：SpeakMode＋阿里云百炼` )];
+  const progressText = describeProgress(recording?.progress, recording?.status, { coarse: true });
+  if (progressText) elements.push(text(progressText));
   if (row.inputError) elements.push(text(row.inputError));
   if (recording?.status === 'failed') elements.push(text(`${recording.error}\n可在 ANC Card 本机录音页重试，结果会更新到这张卡片。`));
   if (recording?.status === 'complete') {

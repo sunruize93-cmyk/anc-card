@@ -31,6 +31,9 @@ test('explicit renewal preserves token/device/pair window; live reload, expiry a
     assert.equal(phone.expiresAt,renewed.expiresAt);assert.equal(phone.token,renewed.token);
     assert.ok(renewed.expiresAt>Date.now()+6*86400000);assert.equal((await stat(file)).mode&0o777,0o600);
     assert.equal((await stat(output)).mode&0o777,0o600);
+    const health=await (await fetch('http://'+host+'/v1/health',{headers:{Authorization:'Bearer '+original.token}})).json();
+    assert.equal(health.expiresAt,renewed.expiresAt);assert.equal(health.maxAudioBytes,256*1024*1024);
+    assert.ok(!JSON.stringify(health).includes(original.token));
     assert.equal((await request()).status,404); // Authenticated but no ownership receipt.
     assert.equal((await request('d'.repeat(64))).status,401);
     assert.equal((await fetch('http://'+host+'/v1/pair',{method:'POST',body:'{"code":"12345678"}'})).status,401);

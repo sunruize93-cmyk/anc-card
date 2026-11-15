@@ -23,7 +23,7 @@ async function status() {
   try {
     const state = await request(receipt.resultPath);
     const labels = { queued: '已持久化排队', processing: 'SpeakMode＋百炼正在转写', failed: '转写失败，原件已保留，请在 Mac 端重试', complete: '转写完成' };
-    $('status').textContent = (labels[state.status] || state.status) + '\n' +
+    $('status').textContent = (labels[state.status] || state.status) + '\n' + (state.progressText ? state.progressText + '\n' : '') +
       (state.feishu.state === 'complete' ? '飞书结果卡已发送，请到 nestlinker work 查看。' : state.feishu.state === 'retrying' ? '飞书暂未送达，后台正在重试。' : '飞书结果卡正在同步。');
     if (state.feishu.state !== 'complete' && state.status !== 'failed') timer = setTimeout(status, 3000);
   } catch (e) { $('status').textContent = e.message + '\n网络恢复后可点击“刷新处理状态”。'; }

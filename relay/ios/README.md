@@ -10,7 +10,9 @@
 
 ## 11 月 15 日长录音边界
 
-Mac 后台已支持 256 MiB；当前已安装 App 的蓝牙下载仍限制 64 MiB。本轮只更新后台，没有安装新 App 或改动手机。地址、凭证有效期和测试 CA 的续期文件已在 Mac 准备，需用户录音保存后再导入手机。今天一小时录音先通过 USB 原音导入，详见 [长录音准备](../../docs/long-recording-readiness-2026-11-15.md)。
+Mac 后台已支持 256 MiB；11 月 15 日源码中的普通蓝牙下载也提高至 256 MiB，并增加容量、整数溢出和进度解码测试。独立只读探针仍保持 64 MiB 保护。**手机已安装版本仍是 64 MiB，尚未安装此次更新。** 用户今天未录制原计划的一小时音频，因此长录音真机链路仍未验收。地址、凭证及测试 CA 需要在同 Wi-Fi 下核对，旧地址可能随 Mac 换网失效。
+
+本次 Swift 包 79 项测试通过，22 个 App 源文件通过 iPhone SDK 检查。完整 Xcode 打包在图标资源编译时因缺少模拟器运行环境失败；没有为此重新下载数 GB 组件，也没有安装或改动手机。详见 [本次软件优化](../../docs/software-polish-2026-11-15.md)。
 
 ## 构建与安装
 
@@ -21,6 +23,8 @@ xcodebuild -project relay/ios/ANCRelay/ANCRelay.xcodeproj -scheme ANCRelay \
   -configuration Debug -sdk iphoneos DEVELOPMENT_TEAM=YOUR_TEAM \
   PRODUCT_BUNDLE_IDENTIFIER=com.yourcompany.anc.card -allowProvisioningUpdates build
 xcrun swift test --package-path relay/ios/QS668Kit
+# 不打包图标、不签名、不安装的源码检查；不能代替完整构建
+python3 relay/ios/check-source.py
 ```
 
 已安装设备升级时沿用它自己的原 Bundle ID 和签名团队，保留配对和数据；不要为了改图标卸载 App。公开工程默认 ID 是示例，不携带 Eric 的签名或设备配置。

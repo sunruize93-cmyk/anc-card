@@ -44,6 +44,8 @@ export function createMobileHandler({ config, db, upstream, host, fetcher = fetc
         return reply(200, { token: config.token, device: config.device, expiresAt: config.expiresAt });
       }
       if (Date.now() >= config.expiresAt || !timingSafeEqual(hash(req.headers.authorization || ''), hash('Bearer ' + config.token))) return reply(401, { error: '设备凭证无效或过期，请重新配对。' });
+      if (req.method === 'GET' && req.url === '/v1/health') return reply(200, { service: 'anc-upload',
+        device: config.device, expiresAt: config.expiresAt, maxAudioBytes: limit, serverTime: new Date().toISOString() });
       const preflight = /^\/v1\/recordings\/([a-f0-9]{64})\/cleanup-preflight$/.exec(req.url);
       if (req.method === 'GET' && preflight) {
         if (!allowedRecording(preflight[1])) return reply(404, { error: '此设备没有该录音的上传回执' });

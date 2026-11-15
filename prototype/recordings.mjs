@@ -1,3 +1,4 @@
+import { describeProgress } from './recording-progress.mjs';
 import { decodeRawOpus, rawOpusFormat, validateRawOpus } from './audio/qs668.mjs';
 import { openCoffeeDrills } from './coffee-drill.mjs';
 import { execFile } from 'node:child_process';
@@ -17,7 +18,7 @@ import { maxAudioBytes } from './audio-limits.mjs';
 export { maxAudioBytes } from './audio-limits.mjs';
 export const audioTypes = { '.wav': 'audio/wav', '.m4a': 'audio/mp4', '.mp3': 'audio/mpeg', '.opus': 'application/octet-stream' };
 
-async function transcribe(audio, extension, scratch, signal, cache, profile, audioFormat, saveDecode, recognize) {
+async function transcribe(audio, extension, scratch, signal, cache, profile, audioFormat, saveDecode, recognize, report) {
   const directory = await mkdtemp(join(scratch, 'job-'));
   const original = join(directory, 'original' + extension);
   const wav = join(directory, 'normalized.wav');
@@ -40,17 +41,26 @@ async function transcribe(audio, extension, scratch, signal, cache, profile, aud
     normalized = await readFile(wav);
     }
     const segments = [];
-    for (const chunk of splitWav(normalized)) {
+    const chunks = splitWav(normalized);
+    const standard = profile !== 'clinic' && profile !== 'clinic-local';
+    const cached = new Map(standard ? chunks.map(chunk => [chunk.index, cache.get(chunk)]).filter(([, segment]) => segment) : []);
+    let completedChunks = cached.size;
+    report({ stage: 'transcribing', totalChunks: chunks.length, completedChunks,
+      reusedChunks: standard ? cached.size : null, currentChunk: null });
+    for (const chunk of chunks) {
       signal.throwIfAborted();
+      if (!cached.has(chunk.index)) report({ currentChunk: { index: chunk.index, startMs: chunk.startMs, endMs: chunk.endMs } });
       if (profile === 'clinic' || profile === 'clinic-local') {
         segments.push(...await transcribeClinicChunk(chunk, directory, signal, cache.clinic, profile === 'clinic-local'));
+        report({ completedChunks: ++completedChunks, currentChunk: null });
         continue;
       }
-      let segment = cache.get(chunk);
+      let segment = cached.get(chunk.index);
       if (!segment) {
         segment = await recognize(chunk, directory, signal);
         signal.throwIfAborted();
         cache.put(chunk, segment);
+        report({ completedChunks: ++completedChunks, currentChunk: null });
       }
       segments.push(segment);
     }
@@ -92,6 +102,9 @@ export async function openRecordings(directory, { transcribeSegment = transcribe
         createdAt TEXT NOT NULL, status TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0,
         error TEXT, transcript TEXT, ledger TEXT, asrProfile TEXT NOT NULL DEFAULT 'standard'
       );
+      CREATE TABLE IF NOT EXISTS recording_progress (
+        recordingId TEXT PRIMARY KEY, data TEXT NOT NULL
+      );
       CREATE TABLE IF NOT EXISTS chunk_results (
         recordingId TEXT NOT NULL, chunkIndex INTEGER NOT NULL,
         timingMethod TEXT NOT NULL, sha256 TEXT NOT NULL, segment TEXT NOT NULL,
@@ -120,7 +133,7 @@ export async function openRecordings(directory, { transcribeSegment = transcribe
     throw error;
   }
 
-  const fields = 'id, name, createdAt, status, attempts, error, transcript, ledger, asrProfile, audioFormat, decodeInfo';
+  const fields = 'id, name, createdAt, status, attempts, error, transcript, ledger, asrProfile, audioFormat, decodeInfo, (SELECT data FROM recording_progress WHERE recordingId = recordings.id) AS progress';
   const tasks = openTasks(db);
   const inbox = openFeishuInbox(db, audioTypes);
   const delivery = openRecordingDelivery(db);
@@ -131,6 +144,7 @@ export async function openRecordings(directory, { transcribeSegment = transcribe
     VALUES (?, ?, ?, ?, 'queued', ?, ?) ON CONFLICT (id) DO NOTHING
   `);
   const next = db.prepare("SELECT id, name, audio, asrProfile, audioFormat FROM recordings WHERE status = 'queued' ORDER BY rowid LIMIT 1");
+  const saveProgress = db.prepare('INSERT INTO recording_progress(data,recordingId) VALUES(?,?) ON CONFLICT(recordingId) DO UPDATE SET data=excluded.data');
   const saveDecode = db.prepare('UPDATE recordings SET decodeInfo = ? WHERE id = ?');
   const claim = db.prepare("UPDATE recordings SET status = 'processing', attempts = attempts + 1 WHERE id = ?");
   // The transcript, task entries and terminal state commit together.
@@ -145,7 +159,7 @@ export async function openRecordings(directory, { transcribeSegment = transcribe
   const saveChunk = db.prepare(`INSERT INTO chunk_results VALUES (?, ?, ?, ?, ?)
     ON CONFLICT(recordingId, chunkIndex) DO UPDATE SET timingMethod = excluded.timingMethod,
       sha256 = excluded.sha256, segment = excluded.segment`);
-  const decode = row => ({ ...row, transcript: JSON.parse(row.transcript), ledger: JSON.parse(row.ledger), decodeInfo: JSON.parse(row.decodeInfo) });
+  const decode = row => { const progress = JSON.parse(row.progress); return { ...row, transcript: JSON.parse(row.transcript), ledger: JSON.parse(row.ledger), decodeInfo: JSON.parse(row.decodeInfo), progress, progressText: describeProgress(progress, row.status) }; };
   for (const recording of all.all().map(decode)) tasks.ingest(recording);
 
   const shutdown = new AbortController();
@@ -155,6 +169,11 @@ export async function openRecordings(directory, { transcribeSegment = transcribe
       const job = next.get();
       if (!job) return;
       claim.run(job.id);
+      let progress = { stage: 'normalizing', totalChunks: null, completedChunks: 0, reusedChunks: 0,
+        currentChunk: null, startedAt: new Date().toISOString() };
+      const report = patch => { progress = { ...progress, ...patch, updatedAt: new Date().toISOString() };
+        saveProgress.run(JSON.stringify(progress), job.id); };
+      report({});
       try {
         const segments = await transcribe(job.audio, extname(job.name).toLowerCase(), scratch, shutdown.signal, {
           clinic: {
@@ -167,19 +186,22 @@ export async function openRecordings(directory, { transcribeSegment = transcribe
             return segment?.requestedLanguage === requestedLanguage ? segment : null;
           },
           put: (chunk, segment) => saveChunk.run(job.id, chunk.index, timingMethod, chunk.sha256, JSON.stringify(segment)),
-        }, job.asrProfile, job.audioFormat, value => saveDecode.run(JSON.stringify(value), job.id), transcribeSegment);
+        }, job.asrProfile, job.audioFormat, value => saveDecode.run(JSON.stringify(value), job.id), transcribeSegment, report);
         if (shutdown.signal.aborted) return;
+        report({ stage: 'finalizing', currentChunk: null });
         const ledger = extract(segments);
         db.exec('BEGIN');
         try {
           complete.run(JSON.stringify(segments), JSON.stringify(ledger), job.id);
           tasks.ingest({ id: job.id, name: job.name, ledger });
+          report({ stage: 'complete', finishedAt: new Date().toISOString() });
           db.exec('COMMIT');
         } catch (error) {
           db.exec('ROLLBACK');
           throw error;
         }
       } catch (error) {
+        report({ stage: shutdown.signal.aborted ? 'interrupted' : 'failed', failureStage: progress.stage });
         if (!shutdown.signal.aborted) fail.run(error.message, job.id);
       }
     }

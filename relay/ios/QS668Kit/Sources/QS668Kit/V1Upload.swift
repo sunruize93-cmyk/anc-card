@@ -32,6 +32,7 @@ public struct V1Delivery: Codable {
     public let error: String?
     public let feishu: Feishu
     public let document: DocumentReceipt?
+    public let progressText: String?
     public var complete: Bool { status == "complete" && feishu.state == "complete" && !(feishu.messageId ?? "").isEmpty }
 }
 public enum V1Upload {

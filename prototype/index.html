@@ -220,6 +220,7 @@ function renderRecordings(recordings) {
     return `<li><strong>${escape(recording.name)}</strong> <span class="chip">${recordingStatus[recording.status]}</span>
       <span class="small muted">已尝试 ${recording.attempts} 次</span>
       ${recording.status === 'complete' && segments.length ? `<div class="small muted">${source}</div>` : ''}
+      ${recording.progressText ? `<p class="small muted">${escape(recording.progressText)}</p>` : ''}
       ${recording.error ? `<div class="small">${escape(recording.error)}
         <button class="secondary" type="button" data-retry="${recording.id}">${recording.error.includes('clinic_keychain_access_required') ? '处理钥匙串权限后重试' : '重试'}</button></div>` : ''}
       ${recording.status === 'complete' ? `<details><summary>转写全文 · ${recording.ledger.length} 条行动项</summary>

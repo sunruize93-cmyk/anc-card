@@ -122,6 +122,11 @@ const server = createServer(async (request, response) => {
     response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }).end(await readFile(new URL('./personal-agent.html', import.meta.url)));
     return;
   }
+  if (request.method === 'GET' && request.url === '/api/readiness') {
+    const binding = feishu.status();
+    return reply(response, 200, { service: 'anc-card', maxAudioBytes, uploadTimeoutMs,
+      speakmode: await speakmodeStatus(), feishu: { configured: binding.configured, connection: binding.connection, error: binding.error } });
+  }
   if (request.method === 'GET' && request.url === '/') {
     return response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }).end(page);
   }
@@ -235,7 +240,7 @@ const server = createServer(async (request, response) => {
     let document = null;
     try { document = documents ? await documents.receipt(null, recording.id) : null; }
     catch { document = { state: 'failed', errorCode: 'DOCUMENT_READBACK_FAILED', retention: { mode: 'preview', eligible: false } }; }
-    return reply(response, 200, { recordingId: recording.id, status: recording.status, error: recording.error, document, audioFormat: recording.audioFormat, decodeInfo: recording.decodeInfo,
+    return reply(response, 200, { recordingId: recording.id, status: recording.status, error: recording.error, progress: recording.progress, progressText: recording.progressText, document, audioFormat: recording.audioFormat, decodeInfo: recording.decodeInfo,
       feishu: row ? { state: row.finished ? 'complete' : row.error ? 'retrying' : row.messageId ? 'updating' : 'pending',
         messageId: row.messageId, error: row.error } : { state: 'not_requested' } });
   }
