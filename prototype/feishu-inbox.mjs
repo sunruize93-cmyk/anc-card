@@ -85,6 +85,19 @@ export async function downloadAudio(client, row, maxBytes) {
 
 const time = ms => `${Math.floor(ms / 60000).toString().padStart(2, '0')}:${((ms % 60000) / 1000).toFixed(3).padStart(6, '0')}`;
 const clip = (value, max) => value.length > max ? value.slice(0, max) + '\n（内容较长，完整结果保存在 ANC Card 台账中。）' : value;
+function actionSummary(item) {
+  const latestChange = item.deadlineChanges?.at(-1);
+  const lines = [
+    `${item.owner} · ${item.title}${item.deadline ? ' · 截止 ' + item.deadline : ''}`,
+    `${latestChange ? '原分工 ' : ''}[${time(item.startMs)}–${time(item.endMs)}]`,
+  ];
+  if (latestChange) {
+    lines.push(`最近改期 ${latestChange.previousDeadline || '未定'} → ${latestChange.deadline} [${time(latestChange.startMs)}–${time(latestChange.endMs)}]`);
+  }
+  lines.push(`任务 ${item.id}`);
+  return lines.join('\n');
+}
+
 export function recordingCard(row, recording) {
   const states = { queued: '已持久化排队', processing: 'SpeakMode 转写中', complete: '转写完成，行动项待核对', failed: '转写失败，待重试' };
   const status = row.inputError ? '导入未完成' : states[recording?.status];
@@ -97,8 +110,7 @@ export function recordingCard(row, recording) {
   if (recording?.status === 'complete') {
     elements.push(text(clip((recording.transcript || []).map(segment =>
       `[${time(segment.startMs)}–${time(segment.endMs)}] ${segment.text}`).join('\n') || '未检测到可识别的语音。', 4000)));
-    elements.push(text(clip('待核对行动项\n' + ((recording.ledger || []).map(item =>
-      `${item.owner} · ${item.title}${item.deadline ? ' · 截止 ' + item.deadline : ''}\n[${time(item.startMs)}–${time(item.endMs)}]\n任务 ${item.id}`).join('\n\n') || '未提取到明确分工，请核对转写。'), 2000)));
+    elements.push(text(clip('待核对行动项\n' + ((recording.ledger || []).map(actionSummary).join('\n\n') || '未提取到明确分工，请核对转写。'), 2000)));
     elements.push(text('时间范围对应原音频分段。行动项沿用同一任务 ID，核对并准备执行方案后再由负责人确认。'));
   }
   return { schema: '2.0', config: { update_multi: true }, header: {

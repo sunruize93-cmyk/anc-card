@@ -1,9 +1,11 @@
+import { extract } from './recording-actions.mjs';
+export { extract } from './recording-actions.mjs';
 import { parseAsrConcurrency, transcribeStandardChunks } from './asr-pool.mjs';
 import { describeProgress } from './recording-progress.mjs';
 import { decodeRawOpus, rawOpusFormat, validateRawOpus } from './audio/qs668.mjs';
 import { openCoffeeDrills } from './coffee-drill.mjs';
 import { execFile } from 'node:child_process';
-import { createHash, randomUUID } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -58,23 +60,6 @@ async function transcribe(audio, extension, scratch, signal, cache, profile, aud
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
-}
-
-export function extract(segments) {
-  return segments.flatMap(segment => {
-    const pattern = /(?:^|[。！？；，、,.!?;])\s*由\s*(Eric\s+[sS]|[\p{Script=Han}]{1,12}|[A-Za-z][A-Za-z0-9_-]*(?:\.[A-Za-z0-9_-]+)*)\s*[负負][责責]\s*([^。！？；，,.!?;]+)/gu;
-    const matches = [...segment.text.matchAll(pattern)];
-    return matches.map((match, index) => {
-      const [, spokenName, title] = match;
-      const owner = /^Eric\s+s$/i.test(spokenName) ? 'Eric.s' : spokenName;
-      const actionText = segment.text.slice(match.index, matches[index + 1]?.index ?? segment.text.length);
-      const deadline = /截止[时時][间間](?:是|为|為)\s*([^。！？；，,.!?;]+)/u.exec(actionText)?.[1];
-      return { id: randomUUID(), owner, title: title.trim(), deadline: deadline?.trim() ?? null,
-      startMs: segment.startMs, endMs: segment.endMs, evidence: segment.text, status: 'needs_review',
-      timing: segment.timing, sourceId: segment.sourceId, chunkSha256: segment.chunkSha256,
-      };
-    });
-  });
 }
 
 export async function openRecordings(directory, { transcribeSegment = transcribeChunk, concurrency = parseAsrConcurrency() } = {}) {

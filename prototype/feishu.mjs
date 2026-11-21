@@ -14,9 +14,11 @@ export function taskCard(task) {
   const latest = task.rounds.at(-1);
   const checks = latest?.checks || task.transcript.criteria;
   const text = content => ({ tag: 'div', text: { tag: 'plain_text', content } });
+  const latestChange = task.source.deadlineChanges?.at(-1);
   const elements = [
     text(`${task.title}\n录音分工 ${task.owner}\n确认负责人 ${task.ownerDisplayName || task.owner}\n任务 ${task.taskId}\n${labels[task.status] || task.status}`),
     text(`录音来源 ${task.source.name}\n分段回听范围 ${task.source.startMs}–${task.source.endMs} 毫秒\n原文 ${task.source.evidence}`),
+    ...(latestChange ? [text(`当前截止 ${task.deadline}\n最近改期 ${latestChange.previousDeadline || '未定'} → ${latestChange.deadline}\n分段回听范围 ${latestChange.startMs}–${latestChange.endMs} 毫秒\n原文 ${latestChange.evidence}`)] : []),
     ...(checks.length ? [text(checks.map(check => `${latest ? check.passed ? '通过' : '缺口' : '待验收'} · ${check.label}${check.evidence ? '\n' + check.evidence : ''}`).join('\n'))] : []),
   ];
   if (task.profile === 'coffee-drill' && task.chatId) {

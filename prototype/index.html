@@ -187,7 +187,13 @@ function formatTime(ms) {
 }
 
 function timeButton(id, startMs, endMs, timing) {
-  return `<button type="button" class="seek" data-audio="${id}" data-ms="${startMs}">${timing === 'audio_chunk' ? '分段回听 ' : ''}${formatTime(startMs)}–${formatTime(endMs)}</button>`;
+  return `<button type="button" class="seek" data-audio="${escape(id)}" data-ms="${escape(startMs)}">${timing === 'audio_chunk' ? '分段回听 ' : ''}${formatTime(startMs)}–${formatTime(endMs)}</button>`;
+}
+
+function deadlineHistory(recordingId, changes = []) {
+  return changes.map(change => `<div class="small">改期 · ${escape(change.previousDeadline || '未定')} → ${escape(change.deadline)}
+    ${timeButton(recordingId, change.startMs, change.endMs, change.timing)}
+    <span class="muted">原文「${escape(change.evidence)}」</span></div>`).join('');
 }
 
 function speakerLabel(segment) {
@@ -205,7 +211,8 @@ function renderRecordings(recordings) {
     `<li>${timeButton(recording.id, task.startMs, task.endMs, task.timing)} <strong>${escape(task.title)}</strong>
       <span class="chip">待核对</span>
       <div class="small">负责人 ${escape(task.owner)}${task.deadline ? ` · 截止 ${escape(task.deadline)}` : ''}</div>
-      <div class="small muted">${escape(recording.name)} · 原文「${escape(task.evidence)}」</div></li>`)).join('');
+      <div class="small muted">${escape(recording.name)} · 原文「${escape(task.evidence)}」</div>
+      ${deadlineHistory(recording.id, task.deadlineChanges)}</li>`)).join('');
   const queue = recordings.map(recording => {
     const segments = recording.transcript ?? [];
     const transcript = segments.map(segment => {
@@ -389,6 +396,7 @@ async function refreshTasks() {
       return `<li><strong>${escape(task.title)}</strong> <span class="chip">${statuses[task.status] || '待核对'}</span>
         <p class="small muted">任务 ${escape(task.taskId)} · 录音分工 ${escape(task.owner)}${task.ownerDisplayName ? ' · 确认负责人 ' + escape(task.ownerDisplayName) : ''} · 版本 ${task.version}</p>
         <p>${timeButton(task.source.recordingId, task.source.startMs, task.source.endMs, task.source.timing)} ${escape(task.source.evidence)}</p>
+        ${task.source.deadlineChanges?.length ? `<p>当前截止 · ${escape(task.deadline)}</p>${deadlineHistory(task.source.recordingId, task.source.deadlineChanges)}` : ''}
         ${latest ? `<p>已核验 ${latest.checks.filter(check=>check.passed).length}/${latest.checks.length} · ${task.rounds.length} 轮</p>` : ''}
         ${task.proposal ? `<p><strong>${escape(task.proposal.title)}</strong><br>${escape(task.proposal.action)}</p>` : ''}
         ${action ? `<button data-task="${escape(task.taskId)}" data-kind="${action}" data-version="${task.version}" data-proposal="${escape(task.proposal?.id)}">${buttonText}</button>` : ''}
